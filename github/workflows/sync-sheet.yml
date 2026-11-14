@@ -1,39 +1,36 @@
-I've put the YAML configuration here again. Just copy this code block and paste it into your workflow file, then click the green Commit changes button. name: Sync Google Sheet to Repo
+name: Sync Google Sheet to Repo
 
 on:
-schedule:
-- cron: '30 18 * * *'
-workflow_dispatch:
+  schedule:
+    - cron: '30 18 * * *'
+  workflow_dispatch:
 
 permissions:
-contents: write
+  contents: write
 
 jobs:
-update-csv:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout repository
-uses: actions/checkout@v4
+  update-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-```
-  - name: Fetch CSV from Google Sheets
-    env:
-      CSV_URL: ${{ secrets.SHEET_CSV_URL }}
-      FILE_PATH: "data/ops_data.csv"
-    run: |
-      mkdir -p $(dirname "$FILE_PATH")
-      curl -L -s "$CSV_URL" -o "$FILE_PATH"
+      - name: Fetch CSV from Google Sheets
+        env:
+          CSV_URL: ${{ secrets.SHEET_CSV_URL }}
+          FILE_PATH: "data/ops_data.csv"
+        run: |
+          mkdir -p $(dirname "$FILE_PATH")
+          curl -L -s "$CSV_URL" -o "$FILE_PATH"
 
-  - name: Commit and push if changed
-    run: |
-      git config --global user.name "github-actions[bot]"
-      git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      git add .
-      if git diff --staged --quiet; then
-        echo "No changes to commit."
-      else
-        git commit -m "chore: update OPS data CSV from Google Sheets"
-        git push
-      fi
-
-```
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update OPS data CSV from Google Sheets"
+            git push
+          fi
