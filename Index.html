@@ -98,7 +98,7 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <div id="activeFiltersBadge" class="text-xs text-slate-500 font-medium italic"></div>
+                <div id="activeFiltersBadge" class="text-xs text-slate-500 font-medium italic">Loading live data...</div>
                 <button onclick="clearFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition">
                     Clear Filters
                 </button>
@@ -355,7 +355,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH & FALLBACK ENGINE -->
+    <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH ONLY -->
     <script>
         // Global State Management
         let rawData = [];
@@ -364,111 +364,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         let callChartInstance = null;
         let weeklyChartInstance = null;
         let monthlyOutputChart = null;
-        const STORAGE_KEY = 'canwin_hr_dashboard_data_v1';
         const LIVE_CSV_PATH = 'data/ops_data.csv';
-
-        // Sample Fallback Data matching Weekly report.xlsx schema
-        const sampleCSVData = `Timestamp,Email address,OB HR Name,Shift/Half,OL Assigned,OL Released,Calls Assigned,Connected Calls,Not Working,Documents Recieved,WhatsApp Chats Clear,Not Connected Calls,Mails,Other Works
-2026-10-13 13:34:53,santhoshi@canwinhr.com,Santoshi,1st Half,7,7,16,9,1,6,10,6,1,8 foldrs
-2026-10-13 13:43:18,prithi.canwinhr@gmail.com,Prithi R,1st Half,1,1,24,15,1,1,28,9,1,Incoming calls 4
-2026-10-13 15:02:17,lekhan.canwinhr@gmail.com,Lekhana A N,1st Half,0,0,33,13,2,7,25,20,0,9 Form Verification
-2026-10-13 15:03:18,yuvaraju@canwinhr.com,Yuvaraju K,1st Half,0,0,21,10,2,3,35,8,4,
-2026-10-13 15:03:21,monika.canwinhr@gmail.com,Monika G,1st Half,22,22,0,0,0,0,11,0,0,22 Folders
-2026-10-13 19:01:11,santhoshi@canwinhr.com,Santoshi,2nd Half,8,8,40,26,4,11,20,14,2,20 Folders and Form Verification
-2026-10-13 19:01:31,monika.canwinhr@gmail.com,Monika G,2nd Half,7,7,30,22,5,8,15,8,0,"2 Form verification, 7 Folders"
-2026-10-13 19:01:47,misba.canwinhr@gmail.com,Misba,2nd Half,15,15,20,6,2,4,5,14,0,15 Folders
-2026-10-13 19:01:51,lekhan.canwinhr@gmail.com,Lekhana A N,2nd Half,16,16,0,0,0,0,17,0,0,17 Folders
-2026-10-13 19:01:52,premms.canwinhr@gmail.com,M S Prem,1st Half,10,10,0,0,0,0,0,0,0,0
-2026-10-13 19:01:56,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,1st Half,15,15,0,0,0,0,0,0,0,0
-2026-10-13 19:02:09,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,1st Half,1,1,0,0,1,2,22,0,1,
-2026-10-13 19:02:19,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,1st Half,10,10,0,0,0,0,0,0,0,0
-2026-10-13 19:02:21,premms.canwinhr@gmail.com,M S Prem,2nd Half,10,10,0,0,0,0,0,0,0,0
-2026-10-13 19:02:22,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,2nd Half,17,17,0,0,0,0,0,0,0,0
-2026-10-13 19:03:01,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,2nd Half,15,15,0,0,0,0,0,0,0,0
-2026-10-13 19:03:25,yashwanth.gowda@canwinhr@gmail.com,G Yashwanth Gowda,2nd Half,0,0,35,21,1,9,15,14,0,
-2026-10-13 19:03:45,prithi.canwinhr@gmail.com,Prithi R,1st Half,0,0,22,7,0,7,7,15,1,Incoming Calls 4
-2026-10-13 19:06:03,premkumarpg2003@gmail.com,P G Prem Kumar,1st Half,20,20,0,0,0,0,8,0,0,8
-2026-10-13 19:08:08,premkumarpg2003@gmail.com,P G Prem Kumar,2nd Half,12,12,13,4,3,4,10,6,0,0
-2026-10-13 22:58:38,pundarikaksha.canwin@gmail.com,Pundarikaksha S,1st Half,3,3,0,0,0,10,10,0,5,Flipkart Bank Enteries - 52
-2026-10-13 23:00:01,pundarikaksha.canwin@gmail.com,Pundarikaksha S,2nd Half,4,4,0,0,0,18,18,0,5,Flipkart & Myntra Folders - 219
-2026-10-13 10:59:24,yuvaraju@canwinhr.com,Yuvaraju K,2nd Half,25,25,0,0,0,0,10,0,0,
-2026-10-14 13:34:48,lekhan.canwinhr@gmail.com,Lekhana A N,1st Half,0,0,27,8,0,2,25,19,0,
-2026-10-14 13:36:29,monika.canwinhr@gmail.com,Monika G,1st Half,0,0,50,20,2,9,15,30,0,0
-2026-10-14 13:36:38,premkumarpg2003@gmail.com,P G Prem Kumar,1st Half,0,0,46,15,8,11,15,23,0,7
-2026-10-14 14:47:40,santhoshi@canwinhr.com,Santoshi,1st Half,10,10,10,6,2,3,10,4,2,15 Form verification
-2026-10-14 14:59:42,yuvaraju@canwinhr.com,Yuvaraju K,1st Half,0,0,47,36,6,10,20,10,2,
-2026-10-14 18:56:34,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,1st Half,0,0,11,8,0,4,11,3,0,
-2026-10-14 18:57:43,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,2nd Half,0,0,10,8,2,5,10,2,1,
-2026-10-14 18:58:30,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,1st Half,10,10,0,0,0,9,0,0,0,0
-2026-10-14 18:59:15,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,2nd Half,17,17,0,0,0,10,0,0,0,0
-2026-10-14 18:59:28,prithi.canwinhr@gmail.com,Prithi R,1st Half,0,0,16,7,2,5,8,9,1,
-2026-10-14 19:00:52,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,1st Half,2,2,15,15,0,15,15,0,0,0
-2026-10-14 19:01:41,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,2nd Half,15,15,0,0,0,0,0,0,0,0
-2026-10-14 19:01:48,lekhan.canwinhr@gmail.com,Lekhana A N,2nd Half,13,13,26,12,0,4,20,14,0,"18 Form Verification, 13 Folders"
-2026-10-14 19:01:50,misba.canwinhr@gmail.com,Misba,2nd Half,8,8,15,6,2,4,4,9,0,8 Folders
-2026-10-14 19:02:47,monika.canwinhr@gmail.com,Monika G,2nd Half,10,10,14,6,1,1,16,8,0,"10 Folder, 1 Form verification"
-2026-10-14 19:04:30,santhoshi@canwinhr.com,Santoshi,2nd Half,10,10,40,19,10,7,20,11,3,25 Form verification and folders
-2026-10-14 19:08:21,premkumarpg2003@gmail.com,P G Prem Kumar,2nd Half,18,18,0,0,0,0,5,0,0,0
-2026-10-14 09:32:13,pundarikaksha.canwin@gmail.com,Pundarikaksha S,1st Half,6,6,3,3,0,3,3,0,5,Flipkart Bank Entires - 14
-2026-10-14 09:33:15,pundarikaksha.canwin@gmail.com,Pundarikaksha S,2nd Half,8,8,0,0,0,0,0,0,5,Flipkart & Myntra Folders - 61
-2026-10-15 13:31:31,santhoshi@canwinhr.com,Santoshi,1st Half,0,0,40,19,3,7,20,22,0,
-2026-10-15 13:33:34,monika.canwinhr@gmail.com,Monika G,1st Half,0,0,35,9,1,6,16,26,0,5 Form verification
-2026-10-15 13:40:47,premkumarpg2003@gmail.com,P G Prem Kumar,1st Half,4,4,37,10,7,5,10,25,0,15
-2026-10-15 14:35:22,lekhan.canwinhr@gmail.com,Lekhana A N,1st Half,0,0,45,22,2,6,30,23,0,18 Form verification
-2026-10-15 15:25:41,yuvaraju@canwinhr.com,Yuvaraju K,1st Half,0,0,50,24,9,8,10,25,2,
-2026-10-15 16:30:44,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,1st Half,5,5,0,0,2,10,10,0,0,
-2026-10-15 16:31:47,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,2nd Half,10,10,0,0,0,13,13,0,0,0
-2026-10-15 18:53:00,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,1st Half,3,3,4,4,0,3,5,0,0,
-2026-10-15 18:53:46,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,2nd Half,8,8,0,0,0,8,8,0,2,Folders 11
-2026-10-15 18:54:38,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,1st Half,7,7,0,0,0,10,15,0,0,0
-2026-10-15 18:57:03,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,2nd Half,10,10,0,0,0,7,15,0,0,Folders - 45
-2026-10-15 18:57:06,premms.canwinhr@gmail.com,M S Prem,1st Half,10,10,0,0,0,0,0,0,0,0
-2026-10-15 18:58:51,premms.canwinhr@gmail.com,M S Prem,2nd Half,0,0,0,0,0,11,11,0,2,21 Folders
-2026-10-15 19:00:15,santhoshi@canwinhr.com,Santoshi,2nd Half,12,12,20,13,2,4,10,7,2,20 Form verification and folders
-2026-10-15 19:00:20,lekhan.canwinhr@gmail.com,Lekhana A N,2nd Half,28,28,15,7,1,1,15,8,0,28 Folders
-2026-10-15 19:00:34,misba.canwinhr@gmail.com,Misba,2nd Half,3,3,20,6,2,4,4,14,0,4 Folders
-2026-10-15 19:00:59,monika.canwinhr@gmail.com,Monika G,2nd Half,22,22,0,0,0,0,10,0,0,"16 Form verification, 22 Folders"
-2026-10-15 19:16:28,premkumarpg2003@gmail.com,P G Prem Kumar,2nd Half,23,23,40,15,8,5,10,17,0,0
-2026-10-15 10:22:48,pundarikaksha.canwin@gmail.com,Pundarikaksha S,1st Half,3,3,3,3,0,3,0,0,4,Flipkart Pending Folders - 45
-2026-10-15 10:42:57,pundarikaksha.canwin@gmail.com,Pundarikaksha S,2nd Half,0,0,45,45,0,0,0,0,3,Flipkart Folders - 38
-2026-10-15 10:52:20,yuvaraju@canwinhr.com,Yuvaraju K,2nd Half,170,17,0,0,0,0,30,0,4,23 Pending verification
-2026-10-16 13:31:47,monika.canwinhr@gmail.com,Monika G,1st Half,1,1,29,15,7,8,17,14,0,"1 form verification, 1Folder"
-2026-10-16 13:32:50,premkumarpg2003@gmail.com,P G Prem Kumar,1st Half,1,1,8,5,1,4,10,2,P,4
-2026-10-16 14:40:15,lekhan.canwinhr@gmail.com,Lekhana A N,1st Half,0,0,47,21,5,6,25,26,0,1 Form Verification
-2026-10-16 14:41:56,santhoshi@canwinhr.com,Santoshi,1st Half,0,0,30,14,1,8,20,16,0,0
-2026-10-16 18:47:44,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,1st Half,10,10,0,0,0,8,25,0,0,0
-2026-10-16 18:48:45,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,1st Half,Verification 30,0,0,0,0,0,0,0,0,Verification 30
-2026-10-16 18:49:34,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,2nd Half,10,10,0,0,0,10,10,0,3,
-2026-10-16 18:50:12,misba.canwinhr@gmail.com,Misba,2nd Half,11,11,25,10,2,8,8,15,0,7 Folders
-2026-10-16 18:50:12,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,2nd Half,6,6,0,0,0,10,0,0,0,Folders - 25
-2026-10-16 18:53:20,lekhan.canwinhr@gmail.com,Lekhana A N,2nd Half,12,12,48,30,14,5,20,18,0,"4 Form Verification, 17 Folders"
-2026-10-16 18:54:48,monika.canwinhr@gmail.com,Monika G,2nd Half,30,30,0,0,0,0,9,0,0,"5 Form verification, 30 Folders"
-2026-10-16 18:59:55,santhoshi@canwinhr.com,Santoshi,2nd Half,20,20,0,0,0,6,10,0,2,80 Form verification and folders
-2026-10-16 19:00:05,premkumarpg2003@gmail.com,P G Prem Kumar,2nd Half,17,17,10,8,1,4,10,1,0,4
-2026-10-16 19:19:52,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,1st Half,4,4,0,0,0,0,0,0,0,0
-2026-10-16 19:20:32,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,2nd Half,15,15,0,0,0,0,0,0,0,0
-2026-10-16 09:43:34,yuvaraju@canwinhr.com,Yuvaraju K,1st Half,0,0,59,34,5,12,30,25,2,
-2026-10-16 09:44:37,yuvaraju@canwinhr.com,Yuvaraju K,2nd Half,20,20,0,0,0,0,25,0,4,G Form Verification 27
-2026-10-17 13:30:51,lekhan.canwinhr@gmail.com,Lekhana A N,1st Half,0,0,31,15,1,7,15,16,0,4 Form Verification
-2026-10-17 13:32:19,monika.canwinhr@gmail.com,Monika G,1st Half,0,0,40,9,1,2,9,31,0,4 Form Verification
-2026-10-17 14:48:34,santhoshi@canwinhr.com,Santoshi,1st Half,6,6,30,18,3,6,10,12,1,20 Form verification and folders
-2026-10-17 17:45:52,premkumarpg2003@gmail.com,P G Prem Kumar,1st Half,0,0,33,5,2,4,8,26,0,0
-2026-10-17 17:46:27,premkumarpg2003@gmail.com,P G Prem Kumar,2nd Half,1,1,0,0,0,0,5,0,0,0
-2026-10-17 17:57:56,santhoshi@canwinhr.com,Santoshi,2nd Half,6,6,30,14,2,6,20,16,2,10 Form verification and folders
-2026-10-17 17:58:00,lekhan.canwinhr@gmail.com,Lekhana A N,2nd Half,0,0,45,20,5,5,15,25,0,"24 Form Verification, 2 Folders"
-2026-10-17 17:58:08,misba.canwinhr@gmail.com,Misba,2nd Half,4,4,24,12,3,7,7,12,0,4 Folders
-2026-10-17 17:58:29,monika.canwinhr@gmail.com,Monika G,0,0,18,5,1,11,3,13,0,11 Form Verification
-2026-10-17 17:59:26,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,1st Half,BCPL Verification done 15,0,0,0,0,0,5,0,0,BCPL Verification done 15
-2026-10-17 18:00:46,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,2nd Half,BCPL Verification Comleted 22,0,0,0,0,0,2,0,1,BCPL Verification Comleted 22
-2026-10-18 17:13:41,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,1st Half,14,14,0,0,0,0,0,0,0,0
-2026-10-16 08:18:41,pundarikaksha.canwin@gmail.com,Pundarikaksha S,1st Half,5,5,13,13,0,13,13,0,5,Myntra Bank Entires - 13
-2026-10-16 08:21:04,pundarikaksha.canwin@gmail.com,Pundarikaksha S,2nd Half,0,0,0,0,0,0,0,0,3,Flipkart Folders - 36
-2026-10-18 08:22:51,pundarikaksha.canwinhr@gmail.com,Pundarikaksha S,1st Half,7,7,0,0,0,0,0,0,2,Flipkart Folders - 18
-2026-10-18 08:24:01,pundarikaksha.canwinhr@gmail.com,Pundarikaksha S,2nd Half,0,0,0,0,0,0,0,0,3,Flipkart Folders -15
-2026-10-16 09:13:54,prempapod18@gmail.com,M S Prem,1st Half,5,5,0,0,0,0,0,0,0,0
-2026-10-16 09:14:25,prempapod18@gmail.com,M S Prem,2nd Half,5,5,0,0,0,0,0,0,0,Verfication in Zenhrx - 209
-2026-10-17 09:15:43,prempapod18@gmail.com,M S Prem,1st Half,5,5,0,0,0,0,0,0,0,0
-2026-10-17 09:16:11,prempapod18@gmail.com,M S Prem,2nd Half,10,10,0,0,0,0,0,0,0,0`;
 
         // Validation & Parsing Utilities
         function parseNumeric(val) {
@@ -493,7 +389,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         // Core App Initialization
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
-            initStorageAndData();
+            initLiveCSVData();
         });
 
         function setupEventListeners() {
@@ -504,7 +400,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = function(event) {
-                            processCSVData(event.target.result, true);
+                            processCSVData(event.target.result);
                         };
                         reader.readAsText(file);
                         e.target.value = '';
@@ -513,39 +409,27 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
         }
 
-        async function initStorageAndData() {
-            // 1. Always attempt to fetch the live synced CSV first (with cache-busting timestamp)
+        async function initLiveCSVData() {
+            const badge = document.getElementById('activeFiltersBadge');
+            badge.innerText = 'Syncing live CSV data...';
+
             try {
                 const response = await fetch(`${LIVE_CSV_PATH}?t=${new Date().getTime()}`);
-                if (response.ok) {
-                    const csvText = await response.text();
-                    if (csvText && csvText.trim().length > 0) {
-                        processCSVData(csvText, false);
-                        return;
-                    }
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} — Could not load ${LIVE_CSV_PATH}`);
                 }
+                const csvText = await response.text();
+                if (!csvText || !csvText.trim()) {
+                    throw new Error(`${LIVE_CSV_PATH} is empty`);
+                }
+                processCSVData(csvText);
             } catch (e) {
-                console.warn("Live CSV not reachable (likely running locally), checking localStorage or fallback.", e);
+                console.error("Live CSV Sync Error:", e);
+                badge.innerHTML = `<span class="text-rose-600 font-semibold">⚠️ Sync Error: ${escapeHtml(e.message)}</span>`;
             }
-
-            // 2. Fallback to manually uploaded localStorage data if live CSV isn't available
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            if (savedData) {
-                try {
-                    rawData = JSON.parse(savedData);
-                    populateFilterDropdowns();
-                    applyFilters();
-                    return;
-                } catch (e) {
-                    console.error("Error reading from localStorage, falling back to sample data", e);
-                }
-            }
-
-            // 3. Final fallback to hardcoded sample data
-            processCSVData(sampleCSVData, false);
         }
 
-        function processCSVData(csvText, updateStorage) {
+        function processCSVData(csvText) {
             Papa.parse(csvText, {
                 header: true,
                 skipEmptyLines: true,
@@ -570,10 +454,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                             otherWorks: row['Other Works'] || ''
                         };
                     });
-
-                    if (updateStorage) {
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(rawData));
-                    }
 
                     populateFilterDropdowns();
                     applyFilters();
@@ -622,7 +502,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
             if (selectedShift !== 'all') badges.push(selectedShift);
             if (selectedAgent !== 'all') badges.push(`Agent: ${selectedAgent}`);
-            document.getElementById('activeFiltersBadge').innerText = badges.length > 0 ? `Filtering by [ ${badges.join(' | ')} ]` : 'Showing unfiltered complete dataset';
+            document.getElementById('activeFiltersBadge').innerText = badges.length > 0 ? `Filtering by [ ${badges.join(' | ')} ]` : `Showing live dataset (${rawData.length} records)`;
 
             refreshDashboardUI();
         }
@@ -636,14 +516,11 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         }
 
         function resetDashboard() {
-            if (confirm("Reload latest live dataset from server (and clear any manually uploaded CSV)?")) {
-                localStorage.removeItem(STORAGE_KEY);
-                document.getElementById('startDate').value = '';
-                document.getElementById('endDate').value = '';
-                document.getElementById('shiftFilter').value = 'all';
-                document.getElementById('agentFilter').value = 'all';
-                initStorageAndData();
-            }
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('shiftFilter').value = 'all';
+            document.getElementById('agentFilter').value = 'all';
+            initLiveCSVData();
         }
 
         function switchTab(tabId) {
