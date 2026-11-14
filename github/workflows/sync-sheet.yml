@@ -2,8 +2,7 @@ name: Sync Google Sheet to Repo
 
 on:
   schedule:
-    - cron: '30 8 * * *'   # Runs at 2:00 PM IST (after 1st Half)
-    - cron: '30 18 * * *'  # Runs at 12:00 AM IST (after 2nd Half)
+    - cron: '30 18 * * *'
   workflow_dispatch:
 
 permissions:
