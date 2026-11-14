@@ -76,9 +76,11 @@
             <div class="flex items-center space-x-4 flex-wrap gap-y-2">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Date Range</label>
-                    <select id="dateFilter" onchange="applyFilters()" class="border-slate-300 rounded-lg text-xs border py-1.5 px-2.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                        <option value="all">All Available Dates</option>
-                    </select>
+                    <div class="flex items-center space-x-2">
+                        <input type="date" id="startDate" onchange="applyFilters()" class="border border-slate-300 rounded-lg text-xs px-2.5 py-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                        <span class="text-xs text-slate-400">to</span>
+                        <input type="date" id="endDate" onchange="applyFilters()" class="border border-slate-300 rounded-lg text-xs px-2.5 py-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                    </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Shift</label>
@@ -95,7 +97,12 @@
                     </select>
                 </div>
             </div>
-            <div id="activeFiltersBadge" class="text-xs text-slate-500 font-medium italic"></div>
+            <div class="flex items-center space-x-3">
+                <div id="activeFiltersBadge" class="text-xs text-slate-500 font-medium italic"></div>
+                <button onclick="clearFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition">
+                    Clear Filters
+                </button>
+            </div>
         </div>
 
         <!-- KPI Summary Cards -->
@@ -276,7 +283,7 @@
     </main>
 
     <!-- AUTOMATED TEMPLATES MODAL -->
-    <div id="templateModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden items-center justify-center p-4 z-50">
+    <div id="templateModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
                 <h3 class="text-base font-bold text-slate-900 flex items-center">
@@ -301,14 +308,14 @@ CANWIN HR OPERATIONS DAILY DIGEST
 Date: <span class="template-var" data-var="currentDate">[Date]</span>
 
 Shift Distribution:
-• 1st Half OL Released: <span class="template-var" data-var="dh1-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh1-calls">0</span>
-• 2nd Half OL Released: <span class="template-var" data-var="dh2-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh2-calls">0</span>
+- 1st Half OL Released: <span class="template-var" data-var="dh1-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh1-calls">0</span>
+- 2nd Half OL Released: <span class="template-var" data-var="dh2-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh2-calls">0</span>
 
 Total Performance Metrics:
-• Offer Letters Handled: <span class="template-var" data-var="total-ol">0</span>
-• Total Calls Handled: <span class="template-var" data-var="total-calls">0</span>
-• Documents Verified: <span class="template-var" data-var="total-docs">0</span>
-• WhatsApp Queries Clear: <span class="template-var" data-var="total-wa">0</span>
+- Offer Letters Handled: <span class="template-var" data-var="total-ol">0</span>
+- Total Calls Handled: <span class="template-var" data-var="total-calls">0</span>
+- Documents Verified: <span class="template-var" data-var="total-docs">0</span>
+- WhatsApp Queries Clear: <span class="template-var" data-var="total-wa">0</span>
 
 Summary Note: Operational metrics successfully compiled via Canwin Dashboard Engine.
                     </pre>
@@ -327,9 +334,9 @@ CANWIN HR OPERATIONS WEEKLY TREND REPORT
 Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Range]</span>
 
 Weekly Totals:
-• Cumulative OL Released: <span class="template-var" data-var="w-total-ol">0</span>
-• Cumulative Calls Connected: <span class="template-var" data-var="w-total-calls">0</span>
-• Cumulative Documents Processed: <span class="template-var" data-var="w-total-docs">0</span>
+- Cumulative OL Released: <span class="template-var" data-var="w-total-ol">0</span>
+- Cumulative Calls Connected: <span class="template-var" data-var="w-total-calls">0</span>
+- Cumulative Documents Processed: <span class="template-var" data-var="w-total-docs">0</span>
 
 Productivity Analysis:
 Weekly output tracked and visualised. Team throughput meets expected operational baseline.
@@ -464,7 +471,13 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
         function formatDate(timestampStr) {
             if (!timestampStr) return 'Unknown';
-            return timestampStr.trim().split(' ')[0];
+            const rawDate = timestampStr.trim().split(' ')[0];
+            // Normalize DD/MM/YYYY or DD-MM-YYYY to YYYY-MM-DD if needed for date picker comparison
+            if (/^\d{2}[\/-]\d{2}[\/-]\d{4}$/.test(rawDate)) {
+                const parts = rawDate.split(/[\/-]/);
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return rawDate;
         }
 
         // Core App Initialization
@@ -481,10 +494,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = function(event) {
-                            processCSVData(event.target.result, true); // True flag updates storage and triggers live UI refresh
+                            processCSVData(event.target.result, true);
                         };
                         reader.readAsText(file);
-                        // Reset input value to allow re-uploading the same file if needed
                         e.target.value = '';
                     }
                 });
@@ -503,7 +515,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     console.error("Error reading from localStorage, falling back to sample data", e);
                 }
             }
-            // Fallback to sample data if no valid storage exists
             processCSVData(sampleCSVData, false);
         }
 
@@ -548,52 +559,60 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
         // UI & Filter Management
         function populateFilterDropdowns() {
-            const dates = [...new Set(rawData.map(item => item.date))].sort();
             const agents = [...new Set(rawData.map(item => item.agent))].sort();
-
-            const dateSelect = document.getElementById('dateFilter');
-            const currentSelectedDate = dateSelect.value;
-            dateSelect.innerHTML = '<option value="all">All Available Dates</option>';
-            dates.forEach(d => {
-                dateSelect.innerHTML += `<option value="${d}">${d}</option>`;
-            });
-            if(dates.includes(currentSelectedDate)) dateSelect.value = currentSelectedDate;
 
             const agentSelect = document.getElementById('agentFilter');
             const currentSelectedAgent = agentSelect.value;
             agentSelect.innerHTML = '<option value="all">All Agents</option>';
             agents.forEach(a => {
-                agentSelect.innerHTML += `<option value="${a}">${a}</option>`;
+                agentSelect.innerHTML += `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`;
             });
-            if(agents.includes(currentSelectedAgent)) agentSelect.value = currentSelectedAgent;
+            if (agents.includes(currentSelectedAgent)) agentSelect.value = currentSelectedAgent;
         }
 
         function applyFilters() {
-            const selectedDate = document.getElementById('dateFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
             const selectedShift = document.getElementById('shiftFilter').value;
             const selectedAgent = document.getElementById('agentFilter').value;
 
             filteredData = rawData.filter(item => {
-                const matchDate = (selectedDate === 'all' || item.date === selectedDate);
+                const matchStart = !startDate || (item.date !== 'Unknown' && item.date >= startDate);
+                const matchEnd = !endDate || (item.date !== 'Unknown' && item.date <= endDate);
                 const matchShift = (selectedShift === 'all' || item.shift === selectedShift);
                 const matchAgent = (selectedAgent === 'all' || item.agent === selectedAgent);
-                return matchDate && matchShift && matchAgent;
+                return matchStart && matchEnd && matchShift && matchAgent;
             });
 
             // Update Active Filter Badge
             const badges = [];
-            if(selectedDate !== 'all') badges.push(`Date: ${selectedDate}`);
-            if(selectedShift !== 'all') badges.push(selectedShift);
-            if(selectedAgent !== 'all') badges.push(`Agent: ${selectedAgent}`);
+            if (startDate && endDate) {
+                badges.push(`Dates: ${startDate} to ${endDate}`);
+            } else if (startDate) {
+                badges.push(`From: ${startDate}`);
+            } else if (endDate) {
+                badges.push(`Until: ${endDate}`);
+            }
+            if (selectedShift !== 'all') badges.push(selectedShift);
+            if (selectedAgent !== 'all') badges.push(`Agent: ${selectedAgent}`);
             document.getElementById('activeFiltersBadge').innerText = badges.length > 0 ? `Filtering by [ ${badges.join(' | ')} ]` : 'Showing unfiltered complete dataset';
 
             refreshDashboardUI();
         }
 
+        function clearFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('shiftFilter').value = 'all';
+            document.getElementById('agentFilter').value = 'all';
+            applyFilters();
+        }
+
         function resetDashboard() {
-            if(confirm("Are you sure you want to reset the dashboard to the original sample dataset?")) {
+            if (confirm("Are you sure you want to reset the dashboard to the original sample dataset?")) {
                 localStorage.removeItem(STORAGE_KEY);
-                document.getElementById('dateFilter').value = 'all';
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
                 document.getElementById('shiftFilter').value = 'all';
                 document.getElementById('agentFilter').value = 'all';
                 processCSVData(sampleCSVData, true);
@@ -614,18 +633,17 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             activeBtn.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
             document.getElementById(`content-${tabId}`).classList.add('active');
 
-            // Trigger chart resize on tab switch to prevent rendering bugs
             setTimeout(() => {
-                if(shiftChartInstance) shiftChartInstance.resize();
-                if(callChartInstance) callChartInstance.resize();
-                if(weeklyChartInstance) weeklyChartInstance.resize();
-                if(monthlyOutputChart) monthlyOutputChart.resize();
+                if (shiftChartInstance) shiftChartInstance.resize();
+                if (callChartInstance) callChartInstance.resize();
+                if (weeklyChartInstance) weeklyChartInstance.resize();
+                if (monthlyOutputChart) monthlyOutputChart.resize();
             }, 50);
         }
 
         function toggleModal(show) {
             const modal = document.getElementById('templateModal');
-            if(show) {
+            if (show) {
                 modal.classList.remove('hidden');
                 updateTemplatePlaceholders();
             } else {
@@ -667,7 +685,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
         // Render Daily View
         function renderDailyView() {
-            // Populate Table
             const tbody = document.getElementById('table-daily-body');
             tbody.innerHTML = '';
 
@@ -676,7 +693,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
                     <td class="px-4 py-3 font-semibold text-slate-800">${escapeHtml(row.agent)}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full ${row.shift === '1st Half' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">${row.shift}</span></td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full ${row.shift === '1st Half' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">${escapeHtml(row.shift)}</span></td>
                     <td class="px-4 py-3 text-center text-slate-600">${row.olAssigned}</td>
                     <td class="px-4 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
                     <td class="px-4 py-3 text-center text-slate-600">${row.callsAssigned}</td>
@@ -689,13 +706,12 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 tbody.appendChild(tr);
             });
 
-            // Calculate Shifts Data
             let h1OL = 0, h1Calls = 0, h2OL = 0, h2Calls = 0;
             filteredData.forEach(row => {
-                if(row.shift.includes('1')) {
+                if (row.shift.includes('1')) {
                     h1OL += row.olReleased;
                     h1Calls += row.connectedCalls;
-                } else if(row.shift.includes('2')) {
+                } else if (row.shift.includes('2')) {
                     h2OL += row.olReleased;
                     h2Calls += row.connectedCalls;
                 }
@@ -734,10 +750,12 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         function renderWeeklyView() {
             const dailyMap = {};
             filteredData.forEach(row => {
-                if(!dailyMap[row.date]) {
-                    dailyMap[row.date] = { ol: 0, calls: 0, docs: 0, wa: 0 };
+                if (!dailyMap[row.date]) {
+                    dailyMap[row.date] = { olAssigned: 0, ol: 0, totalCalls: 0, calls: 0, docs: 0, wa: 0 };
                 }
+                dailyMap[row.date].olAssigned += row.olAssigned;
                 dailyMap[row.date].ol += row.olReleased;
+                dailyMap[row.date].totalCalls += row.callsAssigned;
                 dailyMap[row.date].calls += row.connectedCalls;
                 dailyMap[row.date].docs += row.docsReceived;
                 dailyMap[row.date].wa += row.whatsappCleared;
@@ -753,9 +771,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
                     <td class="px-4 py-3 font-bold text-slate-800">${date}</td>
-                    <td class="px-4 py-3 text-center text-slate-600">${d.ol}</td>
+                    <td class="px-4 py-3 text-center text-slate-600">${d.olAssigned}</td>
                     <td class="px-4 py-3 text-center font-semibold text-blue-600">${d.ol}</td>
-                    <td class="px-4 py-3 text-center text-slate-600">${d.ol + d.calls}</td>
+                    <td class="px-4 py-3 text-center text-slate-600">${d.totalCalls}</td>
                     <td class="px-4 py-3 text-center font-semibold text-emerald-600">${d.calls}</td>
                     <td class="px-4 py-3 text-center font-semibold text-amber-600">${d.docs}</td>
                     <td class="px-4 py-3 text-center font-semibold text-purple-600">${d.wa}</td>
@@ -763,7 +781,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 tableBody.appendChild(tr);
             });
 
-            if(weeklyChartInstance) weeklyChartInstance.destroy();
+            if (weeklyChartInstance) weeklyChartInstance.destroy();
             const weeklyCtx = document.getElementById('weeklyTrendsChart').getContext('2d');
             weeklyChartInstance = new Chart(weeklyCtx, {
                 type: 'line',
@@ -784,7 +802,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             const agentSummary = {};
 
             filteredData.forEach(row => {
-                if(!agentSummary[row.agent]) {
+                if (!agentSummary[row.agent]) {
                     agentSummary[row.agent] = { ol: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
                 }
                 agentSummary[row.agent].ol += row.olReleased;
@@ -812,7 +830,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 tbody.appendChild(tr);
             });
 
-            if(monthlyOutputChart) monthlyOutputChart.destroy();
+            if (monthlyOutputChart) monthlyOutputChart.destroy();
             const monthlyCtx = document.getElementById('monthlyOutputChart').getContext('2d');
             monthlyOutputChart = new Chart(monthlyCtx, {
                 type: 'bar',
@@ -839,10 +857,10 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 totalDocs += row.docsReceived;
                 totalWA += row.whatsappCleared;
 
-                if(row.shift.includes('1')) {
+                if (row.shift.includes('1')) {
                     h1OL += row.olReleased;
                     h1Calls += row.connectedCalls;
-                } else if(row.shift.includes('2')) {
+                } else if (row.shift.includes('2')) {
                     h2OL += row.olReleased;
                     h2Calls += row.connectedCalls;
                 }
@@ -853,19 +871,19 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
             document.querySelectorAll('#templateModal .template-var').forEach(el => {
                 const v = el.getAttribute('data-var');
-                if(v === 'currentDate') el.innerText = new Date().toLocaleDateString();
-                if(v === 'dh1-ol') el.innerText = h1OL;
-                if(v === 'dh1-calls') el.innerText = h1Calls;
-                if(v === 'dh2-ol') el.innerText = h2OL;
-                if(v === 'dh2-calls') el.innerText = h2Calls;
-                if(v === 'total-ol') el.innerText = totalOL;
-                if(v === 'total-calls') el.innerText = totalCalls;
-                if(v === 'total-docs') el.innerText = totalDocs;
-                if(v === 'total-wa') el.innerText = totalWA;
-                if(v === 'w-total-ol') el.innerText = totalOL;
-                if(v === 'w-total-calls') el.innerText = totalCalls;
-                if(v === 'w-total-docs') el.innerText = totalDocs;
-                if(v === 'weekRange') el.innerText = dateRangeText;
+                if (v === 'currentDate') el.innerText = new Date().toLocaleDateString();
+                if (v === 'dh1-ol') el.innerText = h1OL;
+                if (v === 'dh1-calls') el.innerText = h1Calls;
+                if (v === 'dh2-ol') el.innerText = h2OL;
+                if (v === 'dh2-calls') el.innerText = h2Calls;
+                if (v === 'total-ol') el.innerText = totalOL;
+                if (v === 'total-calls') el.innerText = totalCalls;
+                if (v === 'total-docs') el.innerText = totalDocs;
+                if (v === 'total-wa') el.innerText = totalWA;
+                if (v === 'w-total-ol') el.innerText = totalOL;
+                if (v === 'w-total-calls') el.innerText = totalCalls;
+                if (v === 'w-total-docs') el.innerText = totalDocs;
+                if (v === 'weekRange') el.innerText = dateRangeText;
             });
         }
 
@@ -883,17 +901,17 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         }
 
         function escapeHtml(unsafe) {
-            return unsafe
-                 .replace(/&/g, "&amp;")
-                 .replace(/</g, "&lt;")
-                 .replace(/>/g, "&gt;")
-                 .replace(/"/g, "&quot;")
-                 .replace(/'/g, "&#039;");
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
 
         function exportTableToCSV(filename) {
             let csv = [];
-            let rows = document.querySelectorAll("table tr");
+            let rows = document.querySelectorAll("#content-daily table tr");
             for (let i = 0; i < rows.length; i++) {
                 let row = [], cols = rows[i].querySelectorAll("td, th");
                 for (let j = 0; j < cols.length; j++) 
