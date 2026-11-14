@@ -21,7 +21,7 @@ jobs:
           FILE_PATH: "data/ops_data.csv"
         run: |
           mkdir -p $(dirname "$FILE_PATH")
-          curl -L -s "$CSV_URL" -o "$FILE_PATH"
+          curl -L "$CSV_URL" -o "$FILE_PATH"
 
       - name: Commit and push if changed
         run: |
