@@ -38,7 +38,7 @@
                         <span>Import CSV</span>
                         <input type="file" id="csvFileInput" accept=".csv" class="hidden">
                     </label>
-                    <button onclick="resetDashboard()" class="text-slate-400 hover:text-white p-2 rounded-lg transition text-xs" title="Reset to Sample Data">
+                    <button onclick="resetDashboard()" class="text-slate-400 hover:text-white p-2 rounded-lg transition text-xs" title="Reload Live Data">
                         <i class="fa-solid fa-rotate-right"></i>
                     </button>
                 </div>
@@ -51,7 +51,7 @@
 
         <!-- Navigation Tabs -->
         <div class="border-b border-slate-200">
-            <nav class="flex space-x-8" aria-label="Tabs">
+            <nav class="flex space-x-8 overflow-x-auto" aria-label="Tabs">
                 <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn border-blue-600 text-blue-600 whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-xs flex items-center space-x-2 transition">
                     <i class="fa-solid fa-calendar-day"></i>
                     <span>Daily Operations</span>
@@ -64,7 +64,7 @@
                     <i class="fa-solid fa-calendar-days"></i>
                     <span>Monthly Summaries</span>
                 </button>
-                <button onclick="toggleModal(true)" class="ml-auto self-center bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                <button onclick="toggleModal(true)" class="ml-auto self-center bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center space-x-1.5">
                     <i class="fa-solid fa-file-invoice"></i>
                     <span>Automated Templates</span>
                 </button>
@@ -308,14 +308,20 @@ CANWIN HR OPERATIONS DAILY DIGEST
 Date: <span class="template-var" data-var="currentDate">[Date]</span>
 
 Shift Distribution:
-- 1st Half OL Released: <span class="template-var" data-var="dh1-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh1-calls">0</span>
-- 2nd Half OL Released: <span class="template-var" data-var="dh2-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh2-calls">0</span>
+- 1st Half OL Released: 
+<span class="template-var" data-var="dh1-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh1-calls">0</span>
+- 2nd Half OL Released: 
+<span class="template-var" data-var="dh2-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh2-calls">0</span>
 
 Total Performance Metrics:
-- Offer Letters Handled: <span class="template-var" data-var="total-ol">0</span>
-- Total Calls Handled: <span class="template-var" data-var="total-calls">0</span>
-- Documents Verified: <span class="template-var" data-var="total-docs">0</span>
-- WhatsApp Queries Clear: <span class="template-var" data-var="total-wa">0</span>
+- Offer Letters Handled: 
+<span class="template-var" data-var="total-ol">0</span>
+- Total Calls Handled: 
+<span class="template-var" data-var="total-calls">0</span>
+- Documents Verified: 
+<span class="template-var" data-var="total-docs">0</span>
+- WhatsApp Queries Clear: 
+<span class="template-var" data-var="total-wa">0</span>
 
 Summary Note: Operational metrics successfully compiled via Canwin Dashboard Engine.
                     </pre>
@@ -334,9 +340,12 @@ CANWIN HR OPERATIONS WEEKLY TREND REPORT
 Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Range]</span>
 
 Weekly Totals:
-- Cumulative OL Released: <span class="template-var" data-var="w-total-ol">0</span>
-- Cumulative Calls Connected: <span class="template-var" data-var="w-total-calls">0</span>
-- Cumulative Documents Processed: <span class="template-var" data-var="w-total-docs">0</span>
+- Cumulative OL Released: 
+<span class="template-var" data-var="w-total-ol">0</span>
+- Cumulative Calls Connected: 
+<span class="template-var" data-var="w-total-calls">0</span>
+- Cumulative Documents Processed: 
+<span class="template-var" data-var="w-total-docs">0</span>
 
 Productivity Analysis:
 Weekly output tracked and visualised. Team throughput meets expected operational baseline.
@@ -346,7 +355,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH LIVE LOCALSTORAGE ENGINE -->
+    <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH & FALLBACK ENGINE -->
     <script>
         // Global State Management
         let rawData = [];
@@ -356,8 +365,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         let weeklyChartInstance = null;
         let monthlyOutputChart = null;
         const STORAGE_KEY = 'canwin_hr_dashboard_data_v1';
+        const LIVE_CSV_PATH = 'data/ops_data.csv';
 
-        // Sample Hardcoded Data matching Weekly report.xlsx schema
+        // Sample Fallback Data matching Weekly report.xlsx schema
         const sampleCSVData = `Timestamp,Email address,OB HR Name,Shift/Half,OL Assigned,OL Released,Calls Assigned,Connected Calls,Not Working,Documents Recieved,WhatsApp Chats Clear,Not Connected Calls,Mails,Other Works
 2026-10-13 13:34:53,santhoshi@canwinhr.com,Santoshi,1st Half,7,7,16,9,1,6,10,6,1,8 foldrs
 2026-10-13 13:43:18,prithi.canwinhr@gmail.com,Prithi R,1st Half,1,1,24,15,1,1,28,9,1,Incoming calls 4
@@ -375,7 +385,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 2026-10-13 19:02:21,premms.canwinhr@gmail.com,M S Prem,2nd Half,10,10,0,0,0,0,0,0,0,0
 2026-10-13 19:02:22,nitheesh.canwinhr@gmail.com,Pasam Nitheesh Kumar,2nd Half,17,17,0,0,0,0,0,0,0,0
 2026-10-13 19:03:01,nikitha.canwinhr@gmail.com,Bilgundhe Nikitha,2nd Half,15,15,0,0,0,0,0,0,0,0
-2026-10-13 19:03:25,yashwanth.gowda@canwinhr.com,G Yashwanth Gowda,2nd Half,0,0,35,21,1,9,15,14,0,
+2026-10-13 19:03:25,yashwanth.gowda@canwinhr@gmail.com,G Yashwanth Gowda,2nd Half,0,0,35,21,1,9,15,14,0,
 2026-10-13 19:03:45,prithi.canwinhr@gmail.com,Prithi R,1st Half,0,0,22,7,0,7,7,15,1,Incoming Calls 4
 2026-10-13 19:06:03,premkumarpg2003@gmail.com,P G Prem Kumar,1st Half,20,20,0,0,0,0,8,0,0,8
 2026-10-13 19:08:08,premkumarpg2003@gmail.com,P G Prem Kumar,2nd Half,12,12,13,4,3,4,10,6,0,0
@@ -503,7 +513,22 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
         }
 
-        function initStorageAndData() {
+        async function initStorageAndData() {
+            // 1. Always attempt to fetch the live synced CSV first (with cache-busting timestamp)
+            try {
+                const response = await fetch(`${LIVE_CSV_PATH}?t=${new Date().getTime()}`);
+                if (response.ok) {
+                    const csvText = await response.text();
+                    if (csvText && csvText.trim().length > 0) {
+                        processCSVData(csvText, false);
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn("Live CSV not reachable (likely running locally), checking localStorage or fallback.", e);
+            }
+
+            // 2. Fallback to manually uploaded localStorage data if live CSV isn't available
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
                 try {
@@ -515,6 +540,8 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     console.error("Error reading from localStorage, falling back to sample data", e);
                 }
             }
+
+            // 3. Final fallback to hardcoded sample data
             processCSVData(sampleCSVData, false);
         }
 
@@ -609,13 +636,13 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         }
 
         function resetDashboard() {
-            if (confirm("Are you sure you want to reset the dashboard to the original sample dataset?")) {
+            if (confirm("Reload latest live dataset from server (and clear any manually uploaded CSV)?")) {
                 localStorage.removeItem(STORAGE_KEY);
                 document.getElementById('startDate').value = '';
                 document.getElementById('endDate').value = '';
                 document.getElementById('shiftFilter').value = 'all';
                 document.getElementById('agentFilter').value = 'all';
-                processCSVData(sampleCSVData, true);
+                initStorageAndData();
             }
         }
 
