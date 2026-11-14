@@ -2,7 +2,8 @@ name: Sync Google Sheet to Repo
 
 on:
   schedule:
-    - cron: '30 18 * * *'
+    - cron: '30 8 * * *'   # Runs at 2:00 PM IST (after 1st Half)
+    - cron: '30 18 * * *'  # Runs at 12:00 AM IST (after 2nd Half)
   workflow_dispatch:
 
 permissions:
@@ -21,7 +22,8 @@ jobs:
           FILE_PATH: "data/ops_data.csv"
         run: |
           mkdir -p $(dirname "$FILE_PATH")
-          curl -L "$CSV_URL" -o "$FILE_PATH"
+          curl -fL "$CSV_URL" -o "$FILE_PATH"
+          head -n 5 "$FILE_PATH"
 
       - name: Commit and push if changed
         run: |
