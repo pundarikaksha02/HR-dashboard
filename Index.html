@@ -105,17 +105,29 @@
             </div>
         </div>
 
-        <!-- KPI Summary Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI Summary Cards (Row 1: Core Operations) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-600">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Offer Letters</p>
-                        <h3 id="stat-ol" class="text-xl font-bold text-slate-800 mt-1">0</h3>
-                        <p class="text-xs text-slate-500 mt-0.5"><span id="stat-ol-sub" class="font-bold text-blue-600">0</span> Released</p>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Offer Letter Assigned</p>
+                        <h3 id="stat-ol-assigned" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Total Assigned</p>
                     </div>
                     <div class="bg-blue-50 p-2.5 rounded-lg">
-                        <i class="fa-solid fa-file-contract text-blue-600 text-sm"></i>
+                        <i class="fa-solid fa-file-signature text-blue-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-sky-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Offer Letter Released</p>
+                        <h3 id="stat-ol-released" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5"><span class="font-bold text-sky-600">Released</span></p>
+                    </div>
+                    <div class="bg-sky-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-file-contract text-sky-600 text-sm"></i>
                     </div>
                 </div>
             </div>
@@ -157,6 +169,58 @@
             </div>
         </div>
 
+        <!-- KPI Summary Cards (Row 2: Promotions, Revised Offers & Off-Boarding) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Promotion Letter</p>
+                        <h3 id="stat-promo" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5"><span class="font-bold text-indigo-600">Released</span></p>
+                    </div>
+                    <div class="bg-indigo-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-award text-indigo-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-cyan-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Revised Offer Letter</p>
+                        <h3 id="stat-revised-ol" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5"><span class="font-bold text-cyan-600">Released</span></p>
+                    </div>
+                    <div class="bg-cyan-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-file-pen text-cyan-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Off Boarding Letter Assigned</p>
+                        <h3 id="stat-offboard-assigned" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Total Assigned</p>
+                    </div>
+                    <div class="bg-orange-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-user-minus text-orange-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-rose-500">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Off Boarding Letter Issued</p>
+                        <h3 id="stat-offboard-issued" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5"><span class="font-bold text-rose-600">Issued</span></p>
+                    </div>
+                    <div class="bg-rose-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-file-circle-check text-rose-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TAB CONTENT: DAILY -->
         <div id="content-daily" class="tab-content active space-y-6">
             <!-- Performance Analysis Section -->
@@ -188,16 +252,20 @@
                     <table class="min-w-full divide-y divide-slate-200 text-xs">
                         <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
-                                <th class="px-4 py-3 text-left">HR Agent</th>
-                                <th class="px-4 py-3 text-left">Shift</th>
-                                <th class="px-4 py-3 text-center">OL Assigned</th>
-                                <th class="px-4 py-3 text-center">OL Released</th>
-                                <th class="px-4 py-3 text-center">Calls Assigned</th>
-                                <th class="px-4 py-3 text-center">Connected</th>
-                                <th class="px-4 py-3 text-center">Not Connected</th>
-                                <th class="px-4 py-3 text-center">Docs Rec.</th>
-                                <th class="px-4 py-3 text-center">WA Cleared</th>
-                                <th class="px-4 py-3 text-center">Not Working</th>
+                                <th class="px-3 py-3 text-left">HR Agent</th>
+                                <th class="px-3 py-3 text-left">Shift</th>
+                                <th class="px-3 py-3 text-center">OL Assigned</th>
+                                <th class="px-3 py-3 text-center">OL Released</th>
+                                <th class="px-3 py-3 text-center">Promo Released</th>
+                                <th class="px-3 py-3 text-center">Revised OL</th>
+                                <th class="px-3 py-3 text-center">Offboard Assigned</th>
+                                <th class="px-3 py-3 text-center">Offboard Issued</th>
+                                <th class="px-3 py-3 text-center">Calls Assigned</th>
+                                <th class="px-3 py-3 text-center">Connected</th>
+                                <th class="px-3 py-3 text-center">Not Connected</th>
+                                <th class="px-3 py-3 text-center">Docs Rec.</th>
+                                <th class="px-3 py-3 text-center">WA Cleared</th>
+                                <th class="px-3 py-3 text-center">Not Working</th>
                             </tr>
                         </thead>
                         <tbody id="table-daily-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -229,13 +297,17 @@
                     <table class="min-w-full divide-y divide-slate-200 text-xs">
                         <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
-                                <th class="px-4 py-3 text-left">Date</th>
-                                <th class="px-4 py-3 text-center">Total OL Assigned</th>
-                                <th class="px-4 py-3 text-center">Total OL Released</th>
-                                <th class="px-4 py-3 text-center">Total Calls</th>
-                                <th class="px-4 py-3 text-center">Connected Calls</th>
-                                <th class="px-4 py-3 text-center">Docs Received</th>
-                                <th class="px-4 py-3 text-center">WA Cleared</th>
+                                <th class="px-3 py-3 text-left">Date</th>
+                                <th class="px-3 py-3 text-center">OL Assigned</th>
+                                <th class="px-3 py-3 text-center">OL Released</th>
+                                <th class="px-3 py-3 text-center">Promo Released</th>
+                                <th class="px-3 py-3 text-center">Revised OL</th>
+                                <th class="px-3 py-3 text-center">Offboard Assigned</th>
+                                <th class="px-3 py-3 text-center">Offboard Issued</th>
+                                <th class="px-3 py-3 text-center">Total Calls</th>
+                                <th class="px-3 py-3 text-center">Connected</th>
+                                <th class="px-3 py-3 text-center">Docs Rec.</th>
+                                <th class="px-3 py-3 text-center">WA Cleared</th>
                             </tr>
                         </thead>
                         <tbody id="table-weekly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -266,12 +338,17 @@
                     <table class="min-w-full divide-y divide-slate-200 text-xs">
                         <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
-                                <th class="px-4 py-3 text-left">HR Agent</th>
-                                <th class="px-4 py-3 text-center">Total OL Processed</th>
-                                <th class="px-4 py-3 text-center">Total Calls Handled</th>
-                                <th class="px-4 py-3 text-center">Total Docs Received</th>
-                                <th class="px-4 py-3 text-center">Total WA Chats Cleared</th>
-                                <th class="px-4 py-3 text-center">Total Not Working Logged</th>
+                                <th class="px-3 py-3 text-left">HR Agent</th>
+                                <th class="px-3 py-3 text-center">OL Assigned</th>
+                                <th class="px-3 py-3 text-center">OL Released</th>
+                                <th class="px-3 py-3 text-center">Promo Released</th>
+                                <th class="px-3 py-3 text-center">Revised OL</th>
+                                <th class="px-3 py-3 text-center">Offboard Assigned</th>
+                                <th class="px-3 py-3 text-center">Offboard Issued</th>
+                                <th class="px-3 py-3 text-center">Connected Calls</th>
+                                <th class="px-3 py-3 text-center">Docs Rec.</th>
+                                <th class="px-3 py-3 text-center">WA Cleared</th>
+                                <th class="px-3 py-3 text-center">Not Working</th>
                             </tr>
                         </thead>
                         <tbody id="table-monthly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -308,20 +385,19 @@ CANWIN HR OPERATIONS DAILY DIGEST
 Date: <span class="template-var" data-var="currentDate">[Date]</span>
 
 Shift Distribution:
-- 1st Half OL Released: 
-<span class="template-var" data-var="dh1-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh1-calls">0</span>
-- 2nd Half OL Released: 
-<span class="template-var" data-var="dh2-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh2-calls">0</span>
+- 1st Half OL Released: <span class="template-var" data-var="dh1-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh1-calls">0</span>
+- 2nd Half OL Released: <span class="template-var" data-var="dh2-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh2-calls">0</span>
 
 Total Performance Metrics:
-- Offer Letters Handled: 
-<span class="template-var" data-var="total-ol">0</span>
-- Total Calls Handled: 
-<span class="template-var" data-var="total-calls">0</span>
-- Documents Verified: 
-<span class="template-var" data-var="total-docs">0</span>
-- WhatsApp Queries Clear: 
-<span class="template-var" data-var="total-wa">0</span>
+- Offer Letters Assigned: <span class="template-var" data-var="total-ol-assigned">0</span>
+- Offer Letters Released: <span class="template-var" data-var="total-ol">0</span>
+- Promotion Letters Released: <span class="template-var" data-var="total-promo">0</span>
+- Revised Offer Letters Released: <span class="template-var" data-var="total-revised-ol">0</span>
+- Off Boarding Letters Assigned: <span class="template-var" data-var="total-offboard-assigned">0</span>
+- Off Boarding Letters Issued: <span class="template-var" data-var="total-offboard-issued">0</span>
+- Total Calls Connected: <span class="template-var" data-var="total-calls">0</span>
+- Documents Verified: <span class="template-var" data-var="total-docs">0</span>
+- WhatsApp Queries Cleared: <span class="template-var" data-var="total-wa">0</span>
 
 Summary Note: Operational metrics successfully compiled via Canwin Dashboard Engine.
                     </pre>
@@ -340,12 +416,14 @@ CANWIN HR OPERATIONS WEEKLY TREND REPORT
 Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Range]</span>
 
 Weekly Totals:
-- Cumulative OL Released: 
-<span class="template-var" data-var="w-total-ol">0</span>
-- Cumulative Calls Connected: 
-<span class="template-var" data-var="w-total-calls">0</span>
-- Cumulative Documents Processed: 
-<span class="template-var" data-var="w-total-docs">0</span>
+- Cumulative OL Assigned: <span class="template-var" data-var="w-total-ol-assigned">0</span>
+- Cumulative OL Released: <span class="template-var" data-var="w-total-ol">0</span>
+- Cumulative Promotion Letters Released: <span class="template-var" data-var="w-total-promo">0</span>
+- Cumulative Revised OL Released: <span class="template-var" data-var="w-total-revised-ol">0</span>
+- Cumulative Off Boarding Letters Assigned: <span class="template-var" data-var="w-total-offboard-assigned">0</span>
+- Cumulative Off Boarding Letters Issued: <span class="template-var" data-var="w-total-offboard-issued">0</span>
+- Cumulative Calls Connected: <span class="template-var" data-var="w-total-calls">0</span>
+- Cumulative Documents Processed: <span class="template-var" data-var="w-total-docs">0</span>
 
 Productivity Analysis:
 Weekly output tracked and visualised. Team throughput meets expected operational baseline.
@@ -375,10 +453,21 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             return isNaN(num) ? 0 : num;
         }
 
+        // Case-insensitive helper to safely extract column values regardless of capitalization
+        function getRowValue(row, possibleKeys) {
+            const rowKeys = Object.keys(row);
+            for (const target of possibleKeys) {
+                const foundKey = rowKeys.find(k => k.trim().toLowerCase() === target.toLowerCase());
+                if (foundKey !== undefined) {
+                    return row[foundKey];
+                }
+            }
+            return '';
+        }
+
         function formatDate(timestampStr) {
             if (!timestampStr) return 'Unknown';
             const rawDate = timestampStr.trim().split(' ')[0];
-            // Normalize DD/MM/YYYY or DD-MM-YYYY to YYYY-MM-DD if needed for date picker comparison
             if (/^\d{2}[\/-]\d{2}[\/-]\d{4}$/.test(rawDate)) {
                 const parts = rawDate.split(/[\/-]/);
                 return `${parts[2]}-${parts[1]}-${parts[0]}`;
@@ -443,15 +532,19 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                             email: (row['Email address'] || '').trim().toLowerCase(),
                             agent: (row['OB HR Name'] || 'Unknown').trim(),
                             shift: (row['Shift/Half'] || 'Unknown').trim(),
-                            olAssigned: parseNumeric(row['OL Assigned']),
-                            olReleased: parseNumeric(row['OL Released']),
-                            callsAssigned: parseNumeric(row['Calls Assigned']),
-                            connectedCalls: parseNumeric(row['Connected Calls']),
-                            notConnectedCalls: parseNumeric(row['Not Connected Calls']),
-                            docsReceived: parseNumeric(row['Documents Recieved']),
-                            whatsappCleared: parseNumeric(row['WhatsApp Chats Clear']),
-                            notWorking: parseNumeric(row['Not Working']),
-                            otherWorks: row['Other Works'] || ''
+                            olAssigned: parseNumeric(getRowValue(row, ['OL Assigned', 'Offer Letter Assigned', 'Offer Letters Assigned'])),
+                            olReleased: parseNumeric(getRowValue(row, ['OL Released', 'Offer Letter Released', 'Offer Letters Released'])),
+                            promoReleased: parseNumeric(getRowValue(row, ['Promotion Letter Released', 'Promotion Letters Released'])),
+                            revisedOlReleased: parseNumeric(getRowValue(row, ['Revised Offer Letter Released', 'Revised Offer Letters Released'])),
+                            offboardAssigned: parseNumeric(getRowValue(row, ['Off Boarding Letter Assigned', 'Offboarding Letter Assigned'])),
+                            offboardIssued: parseNumeric(getRowValue(row, ['Off Boarding Letter Issued', 'Offboarding Letter Issued'])),
+                            callsAssigned: parseNumeric(getRowValue(row, ['Calls Assigned'])),
+                            connectedCalls: parseNumeric(getRowValue(row, ['Connected Calls'])),
+                            notConnectedCalls: parseNumeric(getRowValue(row, ['Not Connected Calls'])),
+                            docsReceived: parseNumeric(getRowValue(row, ['Documents Recieved', 'Documents Received'])),
+                            whatsappCleared: parseNumeric(getRowValue(row, ['WhatsApp Chats Clear', 'WhatsApp Chats Cleared'])),
+                            notWorking: parseNumeric(getRowValue(row, ['Not Working'])),
+                            otherWorks: getRowValue(row, ['Other Works']) || ''
                         };
                     });
 
@@ -566,25 +659,36 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
         // Calculation Engines
         function updateKPICards() {
-            let totalOL = 0, totalOLReleased = 0;
+            let totalOLAssigned = 0, totalOLReleased = 0;
             let totalCalls = 0, totalConnected = 0;
             let totalDocs = 0, totalWA = 0;
+            let totalPromo = 0, totalRevisedOL = 0;
+            let totalOffboardAssigned = 0, totalOffboardIssued = 0;
 
             filteredData.forEach(row => {
-                totalOL += row.olAssigned;
+                totalOLAssigned += row.olAssigned;
                 totalOLReleased += row.olReleased;
                 totalCalls += row.callsAssigned;
                 totalConnected += row.connectedCalls;
                 totalDocs += row.docsReceived;
                 totalWA += row.whatsappCleared;
+                totalPromo += row.promoReleased;
+                totalRevisedOL += row.revisedOlReleased;
+                totalOffboardAssigned += row.offboardAssigned;
+                totalOffboardIssued += row.offboardIssued;
             });
 
-            document.getElementById('stat-ol').innerText = totalOL.toLocaleString();
-            document.getElementById('stat-ol-sub').innerText = totalOLReleased.toLocaleString();
+            document.getElementById('stat-ol-assigned').innerText = totalOLAssigned.toLocaleString();
+            document.getElementById('stat-ol-released').innerText = totalOLReleased.toLocaleString();
             document.getElementById('stat-calls').innerText = totalCalls.toLocaleString();
             document.getElementById('stat-connected').innerText = totalConnected.toLocaleString();
             document.getElementById('stat-docs').innerText = totalDocs.toLocaleString();
             document.getElementById('stat-whatsapp').innerText = totalWA.toLocaleString();
+
+            document.getElementById('stat-promo').innerText = totalPromo.toLocaleString();
+            document.getElementById('stat-revised-ol').innerText = totalRevisedOL.toLocaleString();
+            document.getElementById('stat-offboard-assigned').innerText = totalOffboardAssigned.toLocaleString();
+            document.getElementById('stat-offboard-issued').innerText = totalOffboardIssued.toLocaleString();
         }
 
         // Render Daily View
@@ -596,16 +700,20 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-4 py-3 font-semibold text-slate-800">${escapeHtml(row.agent)}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full ${row.shift === '1st Half' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">${escapeHtml(row.shift)}</span></td>
-                    <td class="px-4 py-3 text-center text-slate-600">${row.olAssigned}</td>
-                    <td class="px-4 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
-                    <td class="px-4 py-3 text-center text-slate-600">${row.callsAssigned}</td>
-                    <td class="px-4 py-3 text-center font-bold text-emerald-600">${row.connectedCalls}</td>
-                    <td class="px-4 py-3 text-center text-rose-600">${row.notConnectedCalls}</td>
-                    <td class="px-4 py-3 text-center font-bold text-amber-600">${row.docsReceived}</td>
-                    <td class="px-4 py-3 text-center font-bold text-purple-600">${row.whatsappCleared}</td>
-                    <td class="px-4 py-3 text-center text-slate-400">${row.notWorking}</td>
+                    <td class="px-3 py-3 font-semibold text-slate-800">${escapeHtml(row.agent)}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full ${row.shift === '1st Half' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">${escapeHtml(row.shift)}</span></td>
+                    <td class="px-3 py-3 text-center text-slate-600">${row.olAssigned}</td>
+                    <td class="px-3 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
+                    <td class="px-3 py-3 text-center font-bold text-indigo-600">${row.promoReleased}</td>
+                    <td class="px-3 py-3 text-center font-bold text-cyan-600">${row.revisedOlReleased}</td>
+                    <td class="px-3 py-3 text-center text-orange-600">${row.offboardAssigned}</td>
+                    <td class="px-3 py-3 text-center font-bold text-rose-600">${row.offboardIssued}</td>
+                    <td class="px-3 py-3 text-center text-slate-600">${row.callsAssigned}</td>
+                    <td class="px-3 py-3 text-center font-bold text-emerald-600">${row.connectedCalls}</td>
+                    <td class="px-3 py-3 text-center text-rose-600">${row.notConnectedCalls}</td>
+                    <td class="px-3 py-3 text-center font-bold text-amber-600">${row.docsReceived}</td>
+                    <td class="px-3 py-3 text-center font-bold text-purple-600">${row.whatsappCleared}</td>
+                    <td class="px-3 py-3 text-center text-slate-400">${row.notWorking}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -655,10 +763,14 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             const dailyMap = {};
             filteredData.forEach(row => {
                 if (!dailyMap[row.date]) {
-                    dailyMap[row.date] = { olAssigned: 0, ol: 0, totalCalls: 0, calls: 0, docs: 0, wa: 0 };
+                    dailyMap[row.date] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, totalCalls: 0, calls: 0, docs: 0, wa: 0 };
                 }
                 dailyMap[row.date].olAssigned += row.olAssigned;
                 dailyMap[row.date].ol += row.olReleased;
+                dailyMap[row.date].promo += row.promoReleased;
+                dailyMap[row.date].revisedOl += row.revisedOlReleased;
+                dailyMap[row.date].offAssign += row.offboardAssigned;
+                dailyMap[row.date].offIssue += row.offboardIssued;
                 dailyMap[row.date].totalCalls += row.callsAssigned;
                 dailyMap[row.date].calls += row.connectedCalls;
                 dailyMap[row.date].docs += row.docsReceived;
@@ -674,13 +786,17 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-4 py-3 font-bold text-slate-800">${date}</td>
-                    <td class="px-4 py-3 text-center text-slate-600">${d.olAssigned}</td>
-                    <td class="px-4 py-3 text-center font-semibold text-blue-600">${d.ol}</td>
-                    <td class="px-4 py-3 text-center text-slate-600">${d.totalCalls}</td>
-                    <td class="px-4 py-3 text-center font-semibold text-emerald-600">${d.calls}</td>
-                    <td class="px-4 py-3 text-center font-semibold text-amber-600">${d.docs}</td>
-                    <td class="px-4 py-3 text-center font-semibold text-purple-600">${d.wa}</td>
+                    <td class="px-3 py-3 font-bold text-slate-800">${date}</td>
+                    <td class="px-3 py-3 text-center text-slate-600">${d.olAssigned}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-blue-600">${d.ol}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-indigo-600">${d.promo}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-cyan-600">${d.revisedOl}</td>
+                    <td class="px-3 py-3 text-center text-orange-600">${d.offAssign}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-rose-600">${d.offIssue}</td>
+                    <td class="px-3 py-3 text-center text-slate-600">${d.totalCalls}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-emerald-600">${d.calls}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-amber-600">${d.docs}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-purple-600">${d.wa}</td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -707,9 +823,14 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
             filteredData.forEach(row => {
                 if (!agentSummary[row.agent]) {
-                    agentSummary[row.agent] = { ol: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
+                    agentSummary[row.agent] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
                 }
+                agentSummary[row.agent].olAssigned += row.olAssigned;
                 agentSummary[row.agent].ol += row.olReleased;
+                agentSummary[row.agent].promo += row.promoReleased;
+                agentSummary[row.agent].revisedOl += row.revisedOlReleased;
+                agentSummary[row.agent].offAssign += row.offboardAssigned;
+                agentSummary[row.agent].offIssue += row.offboardIssued;
                 agentSummary[row.agent].calls += row.connectedCalls;
                 agentSummary[row.agent].docs += row.docsReceived;
                 agentSummary[row.agent].wa += row.whatsappCleared;
@@ -724,12 +845,17 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-4 py-3 font-bold text-slate-800">${escapeHtml(agent)}</td>
-                    <td class="px-4 py-3 text-center font-bold text-blue-600">${s.ol}</td>
-                    <td class="px-4 py-3 text-center font-bold text-emerald-600">${s.calls}</td>
-                    <td class="px-4 py-3 text-center font-bold text-amber-600">${s.docs}</td>
-                    <td class="px-4 py-3 text-center font-bold text-purple-600">${s.wa}</td>
-                    <td class="px-4 py-3 text-center font-semibold text-rose-500">${s.nw}</td>
+                    <td class="px-3 py-3 font-bold text-slate-800">${escapeHtml(agent)}</td>
+                    <td class="px-3 py-3 text-center text-slate-600">${s.olAssigned}</td>
+                    <td class="px-3 py-3 text-center font-bold text-blue-600">${s.ol}</td>
+                    <td class="px-3 py-3 text-center font-bold text-indigo-600">${s.promo}</td>
+                    <td class="px-3 py-3 text-center font-bold text-cyan-600">${s.revisedOl}</td>
+                    <td class="px-3 py-3 text-center text-orange-600">${s.offAssign}</td>
+                    <td class="px-3 py-3 text-center font-bold text-rose-600">${s.offIssue}</td>
+                    <td class="px-3 py-3 text-center font-bold text-emerald-600">${s.calls}</td>
+                    <td class="px-3 py-3 text-center font-bold text-amber-600">${s.docs}</td>
+                    <td class="px-3 py-3 text-center font-bold text-purple-600">${s.wa}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-slate-500">${s.nw}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -753,13 +879,19 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         // Automated Template Placeholders Update Logic
         function updateTemplatePlaceholders() {
             let h1OL = 0, h1Calls = 0, h2OL = 0, h2Calls = 0;
-            let totalOL = 0, totalCalls = 0, totalDocs = 0, totalWA = 0;
+            let totalOLAssigned = 0, totalOL = 0, totalCalls = 0, totalDocs = 0, totalWA = 0;
+            let totalPromo = 0, totalRevisedOL = 0, totalOffboardAssigned = 0, totalOffboardIssued = 0;
 
             filteredData.forEach(row => {
+                totalOLAssigned += row.olAssigned;
                 totalOL += row.olReleased;
                 totalCalls += row.connectedCalls;
                 totalDocs += row.docsReceived;
                 totalWA += row.whatsappCleared;
+                totalPromo += row.promoReleased;
+                totalRevisedOL += row.revisedOlReleased;
+                totalOffboardAssigned += row.offboardAssigned;
+                totalOffboardIssued += row.offboardIssued;
 
                 if (row.shift.includes('1')) {
                     h1OL += row.olReleased;
@@ -780,11 +912,21 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 if (v === 'dh1-calls') el.innerText = h1Calls;
                 if (v === 'dh2-ol') el.innerText = h2OL;
                 if (v === 'dh2-calls') el.innerText = h2Calls;
+                if (v === 'total-ol-assigned') el.innerText = totalOLAssigned;
                 if (v === 'total-ol') el.innerText = totalOL;
+                if (v === 'total-promo') el.innerText = totalPromo;
+                if (v === 'total-revised-ol') el.innerText = totalRevisedOL;
+                if (v === 'total-offboard-assigned') el.innerText = totalOffboardAssigned;
+                if (v === 'total-offboard-issued') el.innerText = totalOffboardIssued;
                 if (v === 'total-calls') el.innerText = totalCalls;
                 if (v === 'total-docs') el.innerText = totalDocs;
                 if (v === 'total-wa') el.innerText = totalWA;
+                if (v === 'w-total-ol-assigned') el.innerText = totalOLAssigned;
                 if (v === 'w-total-ol') el.innerText = totalOL;
+                if (v === 'w-total-promo') el.innerText = totalPromo;
+                if (v === 'w-total-revised-ol') el.innerText = totalRevisedOL;
+                if (v === 'w-total-offboard-assigned') el.innerText = totalOffboardAssigned;
+                if (v === 'w-total-offboard-issued') el.innerText = totalOffboardIssued;
                 if (v === 'w-total-calls') el.innerText = totalCalls;
                 if (v === 'w-total-docs') el.innerText = totalDocs;
                 if (v === 'weekRange') el.innerText = dateRangeText;
