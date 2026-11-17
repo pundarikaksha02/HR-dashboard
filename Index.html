@@ -464,7 +464,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm leading-relaxed">
-                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>off-boarding</strong>, <strong>calls</strong>, <strong>top HR agent</strong>, or type an agent's name (e.g., <strong>Balaji K</strong>, <strong>Priyanka</strong>, <strong>Roshan H R</strong>).
+                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>off-boarding</strong>, <strong>calls</strong>, <strong>top HR agent</strong>, or type an agent's name (e.g., <strong>Balaji K</strong>, <strong>Priyanka</strong>, <strong>Santoshi</strong>).
                     </div>
                 </div>
             </div>
@@ -496,17 +496,29 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
     <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH & CHATBOT -->
     <script>
-        // Pre-configured HR Team Roster
+        // Pre-configured HR Team Roster (All 21 Unique Agents)
         const DEFAULT_HR_AGENTS = [
             'Balaji K',
-            'Manoj Kumar',
+            'Bilgundhe Nikitha',
             'Jabeer Khan',
-            'Priyanka',
-            'Nikitha Ramesh Rugi',
-            'Vijaykanth',
-            'Mohammad Farhan',
+            'Lekhana A N',
+            'M S Prem',
+            'Manoj Kumar',
+            'Misba',
             'Mohammad Afshan',
-            'Roshan H R'
+            'Mohammad Farhan',
+            'Monika G',
+            'Nikitha Ramesh Rugi',
+            'P G Prem Kumar',
+            'Pasam Nitheesh Kumar',
+            'Prithi R',
+            'Priyanka',
+            'Pundarikaksha S',
+            'Roshan H R',
+            'Santoshi',
+            'Trisha R',
+            'Vijaykanth',
+            'Yuvaraju K'
         ];
 
         // Global State Management
@@ -632,10 +644,19 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             });
         }
 
-        // UI & Filter Management
+        // UI & Filter Management (Deduplicated case-insensitively)
         function getAllKnownAgents() {
-            const csvAgents = rawData.map(item => item.agent).filter(a => a && a !== 'Unknown');
-            return [...new Set([...DEFAULT_HR_AGENTS, ...csvAgents])].sort();
+            const map = new Map();
+            DEFAULT_HR_AGENTS.forEach(a => map.set(a.trim().toLowerCase(), a.trim()));
+            rawData.forEach(item => {
+                if (item.agent && item.agent !== 'Unknown') {
+                    const key = item.agent.trim().toLowerCase();
+                    if (!map.has(key)) {
+                        map.set(key, item.agent.trim());
+                    }
+                }
+            });
+            return [...map.values()].sort((a, b) => a.localeCompare(b));
         }
 
         function populateFilterDropdowns() {
@@ -896,12 +917,11 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             });
         }
 
-        // Render Monthly View (Always includes all 9 pre-configured HR Agents)
+        // Render Monthly View (Includes all 21 pre-configured HR Agents)
         function renderMonthlyView() {
             const selectedAgent = document.getElementById('agentFilter').value;
             const agentSummary = {};
 
-            // Initialize roster agents with 0s so all team members appear
             const rosterToShow = selectedAgent === 'all' ? getAllKnownAgents() : [selectedAgent];
             rosterToShow.forEach(agentName => {
                 agentSummary[agentName] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
@@ -927,7 +947,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             const tbody = document.getElementById('table-monthly-body');
             tbody.innerHTML = '';
 
-            const sortedAgents = Object.keys(agentSummary).sort();
+            const sortedAgents = Object.keys(agentSummary).sort((a, b) => a.localeCompare(b));
             sortedAgents.forEach(agent => {
                 const s = agentSummary[agent];
                 const tr = document.createElement('tr');
@@ -1072,7 +1092,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         function generateBotResponse(query) {
             const q = query.toLowerCase();
 
-            // Check if query mentions any known HR Agent (including the 9 pre-configured agents)
+            // Check if query mentions any known HR Agent
             const allAgents = getAllKnownAgents();
             const matchedAgent = allAgents.find(a => q.includes(a.toLowerCase()));
             if (matchedAgent) {
