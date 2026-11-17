@@ -162,7 +162,7 @@
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">WhatsApp Chats Cleared</p>
                         <h3 id="stat-whatsapp" class="text-xl font-bold text-slate-800 mt-1">0</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Query Resolution</p>
+                        <p class="text-xs text-slate-500 mt-0.5"><span id="stat-mails" class="font-bold text-purple-600">0</span> Mails</p>
                     </div>
                     <div class="bg-purple-50 p-2.5 rounded-lg">
                         <i class="fa-brands fa-whatsapp text-purple-600 text-sm"></i>
@@ -200,7 +200,7 @@
             <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Off Boarding Letter Assigned</p>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Off-boarding Letter Assigned</p>
                         <h3 id="stat-offboard-assigned" class="text-xl font-bold text-slate-800 mt-1">0</h3>
                         <p class="text-xs text-slate-500 mt-0.5">Total Assigned</p>
                     </div>
@@ -212,12 +212,64 @@
             <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-rose-500">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Off Boarding Letter Issued</p>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Off-boarding Letter Issued</p>
                         <h3 id="stat-offboard-issued" class="text-xl font-bold text-slate-800 mt-1">0</h3>
                         <p class="text-xs text-slate-500 mt-0.5"><span class="font-bold text-rose-600">Issued</span></p>
                     </div>
                     <div class="bg-rose-50 p-2.5 rounded-lg">
                         <i class="fa-solid fa-file-circle-check text-rose-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Summary Cards (Row 3: Mails & All Clients Selections) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-slate-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mails</p>
+                        <h3 id="stat-mails-card" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Email Correspondence</p>
+                    </div>
+                    <div class="bg-slate-100 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-envelope-open-text text-slate-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-teal-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Selections (All Clients)</p>
+                        <h3 id="stat-selections-received" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Received From All Clients</p>
+                    </div>
+                    <div class="bg-teal-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-user-check text-teal-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-violet-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">OL Released (All Clients)</p>
+                        <h3 id="stat-ol-all-clients" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Released From All Clients</p>
+                    </div>
+                    <div class="bg-violet-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-building-circle-check text-violet-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-fuchsia-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Overall Selections [d] / [ss]</p>
+                        <h3 class="text-xl font-bold text-slate-800 mt-1"><span id="stat-overall-d">0</span> <span class="text-sm font-normal text-slate-400">/</span> <span id="stat-overall-ss">0</span></h3>
+                        <p class="text-xs text-slate-500 mt-0.5">[d] Daily &bull; [ss] Snapshot</p>
+                    </div>
+                    <div class="bg-fuchsia-50 p-2.5 rounded-lg">
+                        <i class="fa-solid fa-chart-pie text-fuchsia-600 text-sm"></i>
                     </div>
                 </div>
             </div>
@@ -267,7 +319,12 @@
                                 <th class="px-3 py-3 text-center">Not Connected</th>
                                 <th class="px-3 py-3 text-center">Docs Rec.</th>
                                 <th class="px-3 py-3 text-center">WA Cleared</th>
+                                <th class="px-3 py-3 text-center">Mails</th>
                                 <th class="px-3 py-3 text-center">Not Working</th>
+                                <th class="px-3 py-3 text-center">Selections (All)</th>
+                                <th class="px-3 py-3 text-center">OL Rel. (All)</th>
+                                <th class="px-3 py-3 text-center">Overall [d]</th>
+                                <th class="px-3 py-3 text-center">Overall [ss]</th>
                             </tr>
                         </thead>
                         <tbody id="table-daily-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -310,6 +367,11 @@
                                 <th class="px-3 py-3 text-center">Connected</th>
                                 <th class="px-3 py-3 text-center">Docs Rec.</th>
                                 <th class="px-3 py-3 text-center">WA Cleared</th>
+                                <th class="px-3 py-3 text-center">Mails</th>
+                                <th class="px-3 py-3 text-center">Selections (All)</th>
+                                <th class="px-3 py-3 text-center">OL Rel. (All)</th>
+                                <th class="px-3 py-3 text-center">Overall [d]</th>
+                                <th class="px-3 py-3 text-center">Overall [ss]</th>
                             </tr>
                         </thead>
                         <tbody id="table-weekly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -350,7 +412,12 @@
                                 <th class="px-3 py-3 text-center">Connected Calls</th>
                                 <th class="px-3 py-3 text-center">Docs Rec.</th>
                                 <th class="px-3 py-3 text-center">WA Cleared</th>
+                                <th class="px-3 py-3 text-center">Mails</th>
                                 <th class="px-3 py-3 text-center">Not Working</th>
+                                <th class="px-3 py-3 text-center">Selections (All)</th>
+                                <th class="px-3 py-3 text-center">OL Rel. (All)</th>
+                                <th class="px-3 py-3 text-center">Overall [d]</th>
+                                <th class="px-3 py-3 text-center">Overall [ss]</th>
                             </tr>
                         </thead>
                         <tbody id="table-monthly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -395,11 +462,18 @@ Total Performance Metrics:
 - Offer Letters Released: <span class="template-var" data-var="total-ol">0</span>
 - Promotion Letters Released: <span class="template-var" data-var="total-promo">0</span>
 - Revised Offer Letters Released: <span class="template-var" data-var="total-revised-ol">0</span>
-- Off Boarding Letters Assigned: <span class="template-var" data-var="total-offboard-assigned">0</span>
-- Off Boarding Letters Issued: <span class="template-var" data-var="total-offboard-issued">0</span>
+- Off-boarding Letters Assigned: <span class="template-var" data-var="total-offboard-assigned">0</span>
+- Off-boarding Letters Issued: <span class="template-var" data-var="total-offboard-issued">0</span>
 - Total Calls Connected: <span class="template-var" data-var="total-calls">0</span>
 - Documents Verified: <span class="template-var" data-var="total-docs">0</span>
 - WhatsApp Queries Cleared: <span class="template-var" data-var="total-wa">0</span>
+- Mails Handled: <span class="template-var" data-var="total-mails">0</span>
+
+All Clients Selection Summary:
+- Selections Received From All Clients: <span class="template-var" data-var="total-sel-all">0</span>
+- OL Released From All Clients: <span class="template-var" data-var="total-ol-all">0</span>
+- Overall Selections (All Client) [d]: <span class="template-var" data-var="total-overall-d">0</span>
+- Overall Selections (All Client) [ss]: <span class="template-var" data-var="total-overall-ss">0</span>
 
 Summary Note: Operational metrics successfully compiled via Canwin Dashboard Engine.
                     </pre>
@@ -422,10 +496,13 @@ Weekly Totals:
 - Cumulative OL Released: <span class="template-var" data-var="w-total-ol">0</span>
 - Cumulative Promotion Letters Released: <span class="template-var" data-var="w-total-promo">0</span>
 - Cumulative Revised OL Released: <span class="template-var" data-var="w-total-revised-ol">0</span>
-- Cumulative Off Boarding Letters Assigned: <span class="template-var" data-var="w-total-offboard-assigned">0</span>
-- Cumulative Off Boarding Letters Issued: <span class="template-var" data-var="w-total-offboard-issued">0</span>
+- Cumulative Off-boarding Letters Assigned: <span class="template-var" data-var="w-total-offboard-assigned">0</span>
+- Cumulative Off-boarding Letters Issued: <span class="template-var" data-var="w-total-offboard-issued">0</span>
 - Cumulative Calls Connected: <span class="template-var" data-var="w-total-calls">0</span>
 - Cumulative Documents Processed: <span class="template-var" data-var="w-total-docs">0</span>
+- Cumulative Mails Handled: <span class="template-var" data-var="w-total-mails">0</span>
+- Cumulative Selections (All Clients): <span class="template-var" data-var="w-total-sel-all">0</span>
+- Cumulative OL Released (All Clients): <span class="template-var" data-var="w-total-ol-all">0</span>
 
 Productivity Analysis:
 Weekly output tracked and visualised. Team throughput meets expected operational baseline.
@@ -464,7 +541,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm leading-relaxed">
-                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>off-boarding</strong>, <strong>calls</strong>, <strong>top HR agent</strong>, or type an agent's name (e.g., <strong>Balaji K</strong>, <strong>Priyanka</strong>, <strong>Santoshi</strong>).
+                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>selections</strong>, <strong>off-boarding</strong>, <strong>mails</strong>, <strong>top HR agent</strong>, or type an agent's name.
                     </div>
                 </div>
             </div>
@@ -472,10 +549,10 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             <!-- Quick Suggestion Chips -->
             <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto">
                 <button onclick="sendQuickPrompt('Full summary')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Full Summary</button>
+                <button onclick="sendQuickPrompt('Client selections')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">All Clients Selections</button>
                 <button onclick="sendQuickPrompt('Offer & promotion letters')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Offer & Promo</button>
                 <button onclick="sendQuickPrompt('Off boarding stats')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Off-Boarding</button>
                 <button onclick="sendQuickPrompt('Top HR agent')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Top Agent</button>
-                <button onclick="sendQuickPrompt('Shift comparison')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">1st vs 2nd Half</button>
             </div>
 
             <!-- Input Area -->
@@ -614,24 +691,29 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     rawData = results.data.map((row, index) => {
                         return {
                             id: index,
-                            timestamp: row.Timestamp || '',
-                            date: formatDate(row.Timestamp),
-                            email: (row['Email address'] || '').trim().toLowerCase(),
-                            agent: (row['OB HR Name'] || 'Unknown').trim(),
-                            shift: (row['Shift/Half'] || 'Unknown').trim(),
-                            olAssigned: parseNumeric(getRowValue(row, ['OL Assigned', 'Offer Letter Assigned', 'Offer Letters Assigned'])),
-                            olReleased: parseNumeric(getRowValue(row, ['OL Released', 'Offer Letter Released', 'Offer Letters Released'])),
-                            promoReleased: parseNumeric(getRowValue(row, ['Promotion Letter Released', 'Promotion Letters Released'])),
-                            revisedOlReleased: parseNumeric(getRowValue(row, ['Revised Offer Letter Released', 'Revised Offer Letters Released'])),
-                            offboardAssigned: parseNumeric(getRowValue(row, ['Off Boarding Letter Assigned', 'Offboarding Letter Assigned'])),
-                            offboardIssued: parseNumeric(getRowValue(row, ['Off Boarding Letter Issued', 'Offboarding Letter Issued'])),
+                            timestamp: getRowValue(row, ['Timestamp']) || '',
+                            date: formatDate(getRowValue(row, ['Timestamp'])),
+                            email: (getRowValue(row, ['Email address']) || '').trim().toLowerCase(),
+                            agent: (getRowValue(row, ['OB HR Name']) || 'Unknown').trim(),
+                            shift: (getRowValue(row, ['Shift/Half', 'Shift']) || 'All Shifts').trim(),
+                            olAssigned: parseNumeric(getRowValue(row, ['OL Assigned'])),
+                            olReleased: parseNumeric(getRowValue(row, ['OL Released'])),
                             callsAssigned: parseNumeric(getRowValue(row, ['Calls Assigned'])),
                             connectedCalls: parseNumeric(getRowValue(row, ['Connected Calls'])),
-                            notConnectedCalls: parseNumeric(getRowValue(row, ['Not Connected Calls'])),
+                            notWorking: parseNumeric(getRowValue(row, ['Not Working'])),
                             docsReceived: parseNumeric(getRowValue(row, ['Documents Recieved', 'Documents Received'])),
                             whatsappCleared: parseNumeric(getRowValue(row, ['WhatsApp Chats Clear', 'WhatsApp Chats Cleared'])),
-                            notWorking: parseNumeric(getRowValue(row, ['Not Working'])),
-                            otherWorks: getRowValue(row, ['Other Works']) || ''
+                            notConnectedCalls: parseNumeric(getRowValue(row, ['Not Connected Calls'])),
+                            mails: parseNumeric(getRowValue(row, ['Mails'])),
+                            promoReleased: parseNumeric(getRowValue(row, ['Promotion Letter Released'])),
+                            revisedOlReleased: parseNumeric(getRowValue(row, ['Revised Offer Letter Released'])),
+                            offboardAssigned: parseNumeric(getRowValue(row, ['Off-boarding Letter Assigned', 'Off Boarding Letter Assigned'])),
+                            offboardIssued: parseNumeric(getRowValue(row, ['Off-boarding Letter Issued', 'Off Boarding Letter Issued'])),
+                            otherWorks: getRowValue(row, ['Other Works']) || '',
+                            selectionsAllClients: parseNumeric(getRowValue(row, ['Selections Received From All Clients'])),
+                            olAllClients: parseNumeric(getRowValue(row, ['OL Released from All Clients'])),
+                            overallSelectionsD: parseNumeric(getRowValue(row, ['Overall Selections (All Client) [d]'])),
+                            overallSelectionsSS: parseNumeric(getRowValue(row, ['Overall Selections (All Client) [ss]']))
                         };
                     });
 
@@ -761,9 +843,10 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         function updateKPICards() {
             let totalOLAssigned = 0, totalOLReleased = 0;
             let totalCalls = 0, totalConnected = 0;
-            let totalDocs = 0, totalWA = 0;
+            let totalDocs = 0, totalWA = 0, totalMails = 0;
             let totalPromo = 0, totalRevisedOL = 0;
             let totalOffboardAssigned = 0, totalOffboardIssued = 0;
+            let totalSelAll = 0, totalOlAll = 0, totalOverallD = 0, totalOverallSS = 0;
 
             filteredData.forEach(row => {
                 totalOLAssigned += row.olAssigned;
@@ -772,10 +855,15 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 totalConnected += row.connectedCalls;
                 totalDocs += row.docsReceived;
                 totalWA += row.whatsappCleared;
+                totalMails += row.mails;
                 totalPromo += row.promoReleased;
                 totalRevisedOL += row.revisedOlReleased;
                 totalOffboardAssigned += row.offboardAssigned;
                 totalOffboardIssued += row.offboardIssued;
+                totalSelAll += row.selectionsAllClients;
+                totalOlAll += row.olAllClients;
+                totalOverallD += row.overallSelectionsD;
+                totalOverallSS += row.overallSelectionsSS;
             });
 
             document.getElementById('stat-ol-assigned').innerText = totalOLAssigned.toLocaleString();
@@ -784,11 +872,18 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             document.getElementById('stat-connected').innerText = totalConnected.toLocaleString();
             document.getElementById('stat-docs').innerText = totalDocs.toLocaleString();
             document.getElementById('stat-whatsapp').innerText = totalWA.toLocaleString();
+            document.getElementById('stat-mails').innerText = totalMails.toLocaleString();
 
             document.getElementById('stat-promo').innerText = totalPromo.toLocaleString();
             document.getElementById('stat-revised-ol').innerText = totalRevisedOL.toLocaleString();
             document.getElementById('stat-offboard-assigned').innerText = totalOffboardAssigned.toLocaleString();
             document.getElementById('stat-offboard-issued').innerText = totalOffboardIssued.toLocaleString();
+
+            document.getElementById('stat-mails-card').innerText = totalMails.toLocaleString();
+            document.getElementById('stat-selections-received').innerText = totalSelAll.toLocaleString();
+            document.getElementById('stat-ol-all-clients').innerText = totalOlAll.toLocaleString();
+            document.getElementById('stat-overall-d').innerText = totalOverallD.toLocaleString();
+            document.getElementById('stat-overall-ss').innerText = totalOverallSS.toLocaleString();
         }
 
         // Render Daily View
@@ -800,8 +895,8 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-semibold text-slate-800">${escapeHtml(row.agent)}</td>
-                    <td class="px-3 py-3"><span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full ${row.shift === '1st Half' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">${escapeHtml(row.shift)}</span></td>
+                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap">${escapeHtml(row.agent)}</td>
+                    <td class="px-3 py-3 whitespace-nowrap"><span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full ${row.shift === '1st Half' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">${escapeHtml(row.shift)}</span></td>
                     <td class="px-3 py-3 text-center text-slate-600">${row.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
                     <td class="px-3 py-3 text-center font-bold text-indigo-600">${row.promoReleased}</td>
@@ -813,7 +908,12 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     <td class="px-3 py-3 text-center text-rose-600">${row.notConnectedCalls}</td>
                     <td class="px-3 py-3 text-center font-bold text-amber-600">${row.docsReceived}</td>
                     <td class="px-3 py-3 text-center font-bold text-purple-600">${row.whatsappCleared}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-slate-700">${row.mails}</td>
                     <td class="px-3 py-3 text-center text-slate-400">${row.notWorking}</td>
+                    <td class="px-3 py-3 text-center font-bold text-teal-600">${row.selectionsAllClients}</td>
+                    <td class="px-3 py-3 text-center font-bold text-violet-600">${row.olAllClients}</td>
+                    <td class="px-3 py-3 text-center font-bold text-fuchsia-600">${row.overallSelectionsD}</td>
+                    <td class="px-3 py-3 text-center font-bold text-fuchsia-700">${row.overallSelectionsSS}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -863,7 +963,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             const dailyMap = {};
             filteredData.forEach(row => {
                 if (!dailyMap[row.date]) {
-                    dailyMap[row.date] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, totalCalls: 0, calls: 0, docs: 0, wa: 0 };
+                    dailyMap[row.date] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, totalCalls: 0, calls: 0, docs: 0, wa: 0, mails: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0 };
                 }
                 dailyMap[row.date].olAssigned += row.olAssigned;
                 dailyMap[row.date].ol += row.olReleased;
@@ -875,6 +975,11 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 dailyMap[row.date].calls += row.connectedCalls;
                 dailyMap[row.date].docs += row.docsReceived;
                 dailyMap[row.date].wa += row.whatsappCleared;
+                dailyMap[row.date].mails += row.mails;
+                dailyMap[row.date].selAll += row.selectionsAllClients;
+                dailyMap[row.date].olAll += row.olAllClients;
+                dailyMap[row.date].ovD += row.overallSelectionsD;
+                dailyMap[row.date].ovSS += row.overallSelectionsSS;
             });
 
             const sortedDates = Object.keys(dailyMap).sort();
@@ -886,7 +991,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-bold text-slate-800">${date}</td>
+                    <td class="px-3 py-3 font-bold text-slate-800 whitespace-nowrap">${date}</td>
                     <td class="px-3 py-3 text-center text-slate-600">${d.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-semibold text-blue-600">${d.ol}</td>
                     <td class="px-3 py-3 text-center font-semibold text-indigo-600">${d.promo}</td>
@@ -897,6 +1002,11 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     <td class="px-3 py-3 text-center font-semibold text-emerald-600">${d.calls}</td>
                     <td class="px-3 py-3 text-center font-semibold text-amber-600">${d.docs}</td>
                     <td class="px-3 py-3 text-center font-semibold text-purple-600">${d.wa}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-slate-700">${d.mails}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-teal-600">${d.selAll}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-violet-600">${d.olAll}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-fuchsia-600">${d.ovD}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-fuchsia-700">${d.ovSS}</td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -924,13 +1034,13 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
             const rosterToShow = selectedAgent === 'all' ? getAllKnownAgents() : [selectedAgent];
             rosterToShow.forEach(agentName => {
-                agentSummary[agentName] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
+                agentSummary[agentName] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, mails: 0, nw: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0 };
             });
 
             filteredData.forEach(row => {
                 const matchedKey = Object.keys(agentSummary).find(k => k.toLowerCase() === row.agent.toLowerCase()) || row.agent;
                 if (!agentSummary[matchedKey]) {
-                    agentSummary[matchedKey] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
+                    agentSummary[matchedKey] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, mails: 0, nw: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0 };
                 }
                 agentSummary[matchedKey].olAssigned += row.olAssigned;
                 agentSummary[matchedKey].ol += row.olReleased;
@@ -941,7 +1051,12 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 agentSummary[matchedKey].calls += row.connectedCalls;
                 agentSummary[matchedKey].docs += row.docsReceived;
                 agentSummary[matchedKey].wa += row.whatsappCleared;
+                agentSummary[matchedKey].mails += row.mails;
                 agentSummary[matchedKey].nw += row.notWorking;
+                agentSummary[matchedKey].selAll += row.selectionsAllClients;
+                agentSummary[matchedKey].olAll += row.olAllClients;
+                agentSummary[matchedKey].ovD += row.overallSelectionsD;
+                agentSummary[matchedKey].ovSS += row.overallSelectionsSS;
             });
 
             const tbody = document.getElementById('table-monthly-body');
@@ -953,7 +1068,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-bold text-slate-800">${escapeHtml(agent)}</td>
+                    <td class="px-3 py-3 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(agent)}</td>
                     <td class="px-3 py-3 text-center text-slate-600">${s.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-bold text-blue-600">${s.ol}</td>
                     <td class="px-3 py-3 text-center font-bold text-indigo-600">${s.promo}</td>
@@ -963,7 +1078,12 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     <td class="px-3 py-3 text-center font-bold text-emerald-600">${s.calls}</td>
                     <td class="px-3 py-3 text-center font-bold text-amber-600">${s.docs}</td>
                     <td class="px-3 py-3 text-center font-bold text-purple-600">${s.wa}</td>
+                    <td class="px-3 py-3 text-center font-semibold text-slate-700">${s.mails}</td>
                     <td class="px-3 py-3 text-center font-semibold text-slate-500">${s.nw}</td>
+                    <td class="px-3 py-3 text-center font-bold text-teal-600">${s.selAll}</td>
+                    <td class="px-3 py-3 text-center font-bold text-violet-600">${s.olAll}</td>
+                    <td class="px-3 py-3 text-center font-bold text-fuchsia-600">${s.ovD}</td>
+                    <td class="px-3 py-3 text-center font-bold text-fuchsia-700">${s.ovSS}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -987,8 +1107,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         // Automated Template Placeholders Update Logic
         function updateTemplatePlaceholders() {
             let h1OL = 0, h1Calls = 0, h2OL = 0, h2Calls = 0;
-            let totalOLAssigned = 0, totalOL = 0, totalCalls = 0, totalDocs = 0, totalWA = 0;
+            let totalOLAssigned = 0, totalOL = 0, totalCalls = 0, totalDocs = 0, totalWA = 0, totalMails = 0;
             let totalPromo = 0, totalRevisedOL = 0, totalOffboardAssigned = 0, totalOffboardIssued = 0;
+            let totalSelAll = 0, totalOlAll = 0, totalOverallD = 0, totalOverallSS = 0;
 
             filteredData.forEach(row => {
                 totalOLAssigned += row.olAssigned;
@@ -996,10 +1117,15 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 totalCalls += row.connectedCalls;
                 totalDocs += row.docsReceived;
                 totalWA += row.whatsappCleared;
+                totalMails += row.mails;
                 totalPromo += row.promoReleased;
                 totalRevisedOL += row.revisedOlReleased;
                 totalOffboardAssigned += row.offboardAssigned;
                 totalOffboardIssued += row.offboardIssued;
+                totalSelAll += row.selectionsAllClients;
+                totalOlAll += row.olAllClients;
+                totalOverallD += row.overallSelectionsD;
+                totalOverallSS += row.overallSelectionsSS;
 
                 if (row.shift.includes('1')) {
                     h1OL += row.olReleased;
@@ -1029,6 +1155,11 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 if (v === 'total-calls') el.innerText = totalCalls;
                 if (v === 'total-docs') el.innerText = totalDocs;
                 if (v === 'total-wa') el.innerText = totalWA;
+                if (v === 'total-mails') el.innerText = totalMails;
+                if (v === 'total-sel-all') el.innerText = totalSelAll;
+                if (v === 'total-ol-all') el.innerText = totalOlAll;
+                if (v === 'total-overall-d') el.innerText = totalOverallD;
+                if (v === 'total-overall-ss') el.innerText = totalOverallSS;
                 if (v === 'w-total-ol-assigned') el.innerText = totalOLAssigned;
                 if (v === 'w-total-ol') el.innerText = totalOL;
                 if (v === 'w-total-promo') el.innerText = totalPromo;
@@ -1037,6 +1168,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 if (v === 'w-total-offboard-issued') el.innerText = totalOffboardIssued;
                 if (v === 'w-total-calls') el.innerText = totalCalls;
                 if (v === 'w-total-docs') el.innerText = totalDocs;
+                if (v === 'w-total-mails') el.innerText = totalMails;
+                if (v === 'w-total-sel-all') el.innerText = totalSelAll;
+                if (v === 'w-total-ol-all') el.innerText = totalOlAll;
                 if (v === 'weekRange') el.innerText = dateRangeText;
             });
         }
@@ -1104,14 +1238,16 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     a.olA += r.olAssigned; a.olR += r.olReleased; a.promo += r.promoReleased;
                     a.rev += r.revisedOlReleased; a.offA += r.offboardAssigned; a.offI += r.offboardIssued;
                     a.calls += r.connectedCalls; a.docs += r.docsReceived; a.wa += r.whatsappCleared;
+                    a.mails += r.mails; a.sel += r.selectionsAllClients; a.olAll += r.olAllClients;
                     return a;
-                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0 });
+                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0, mails: 0, sel: 0, olAll: 0 });
 
-                return `<strong>${escapeHtml(matchedAgent)}</strong> (${rows.length} shift logs):<br>
+                return `<strong>${escapeHtml(matchedAgent)}</strong> (${rows.length} logs):<br>
                 • Offer Letters: <strong>${ag.olR}</strong> released / ${ag.olA} assigned<br>
-                • Promotion Letters: <strong>${ag.promo}</strong> | Revised OL: <strong>${ag.rev}</strong><br>
-                • Off-Boarding: <strong>${ag.offI}</strong> issued / ${ag.offA} assigned<br>
-                • Calls Connected: <strong>${ag.calls}</strong> | Docs: <strong>${ag.docs}</strong> | WA: <strong>${ag.wa}</strong>`;
+                • Promotion: <strong>${ag.promo}</strong> | Revised OL: <strong>${ag.rev}</strong><br>
+                • Off-boarding: <strong>${ag.offI}</strong> issued / ${ag.offA} assigned<br>
+                • Calls Connected: <strong>${ag.calls}</strong> | Docs: <strong>${ag.docs}</strong> | WA: <strong>${ag.wa}</strong> | Mails: <strong>${ag.mails}</strong><br>
+                • All Clients Selections: <strong>${ag.sel}</strong> | OL (All Clients): <strong>${ag.olAll}</strong>`;
             }
 
             if (q.includes('team') || q.includes('agent list') || q.includes('employees') || q.includes('roster')) {
@@ -1135,14 +1271,20 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 acc.notConnected += r.notConnectedCalls;
                 acc.docs += r.docsReceived;
                 acc.wa += r.whatsappCleared;
+                acc.mails += r.mails;
                 acc.nw += r.notWorking;
+                acc.selAll += r.selectionsAllClients;
+                acc.olAll += r.olAllClients;
+                acc.ovD += r.overallSelectionsD;
+                acc.ovSS += r.overallSelectionsSS;
                 if (r.shift.includes('1')) { acc.h1OL += r.olReleased; acc.h1Calls += r.connectedCalls; }
                 if (r.shift.includes('2')) { acc.h2OL += r.olReleased; acc.h2Calls += r.connectedCalls; }
                 return acc;
             }, {
                 olAssigned: 0, olReleased: 0, promo: 0, revisedOl: 0,
                 offAssign: 0, offIssue: 0, callsAssigned: 0, connected: 0,
-                notConnected: 0, docs: 0, wa: 0, nw: 0, h1OL: 0, h1Calls: 0, h2OL: 0, h2Calls: 0
+                notConnected: 0, docs: 0, wa: 0, mails: 0, nw: 0,
+                selAll: 0, olAll: 0, ovD: 0, ovSS: 0, h1OL: 0, h1Calls: 0, h2OL: 0, h2Calls: 0
             });
 
             // Top / Best Agent
@@ -1160,6 +1302,15 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 <strong>${escapeHtml(topName)}</strong> leads with <strong>${topStats.ol}</strong> offer letters released, <strong>${topStats.calls}</strong> connected calls, and <strong>${topStats.docs}</strong> documents processed.`;
             }
 
+            // Client Selections
+            if (q.includes('selection') || q.includes('client') || q.includes('overall')) {
+                return `<strong>All Clients Selections Summary:</strong><br>
+                • Selections Received From All Clients: <strong>${totals.selAll.toLocaleString()}</strong><br>
+                • OL Released from All Clients: <strong>${totals.olAll.toLocaleString()}</strong><br>
+                • Overall Selections (All Client) [d]: <strong>${totals.ovD.toLocaleString()}</strong><br>
+                • Overall Selections (All Client) [ss]: <strong>${totals.ovSS.toLocaleString()}</strong>`;
+            }
+
             // Shift Comparison
             if (q.includes('shift') || q.includes('half') || q.includes('1st') || q.includes('2nd')) {
                 return `<strong>Shift Comparison:</strong><br>
@@ -1169,9 +1320,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
             // Off-boarding
             if (q.includes('off') || q.includes('exit') || q.includes('boarding')) {
-                return `<strong>Off-Boarding Summary:</strong><br>
-                • Off Boarding Letter Assigned: <strong>${totals.offAssign.toLocaleString()}</strong><br>
-                • Off Boarding Letter Issued: <strong>${totals.offIssue.toLocaleString()}</strong>`;
+                return `<strong>Off-boarding Summary:</strong><br>
+                • Off-boarding Letter Assigned: <strong>${totals.offAssign.toLocaleString()}</strong><br>
+                • Off-boarding Letter Issued: <strong>${totals.offIssue.toLocaleString()}</strong>`;
             }
 
             // Offer / Promotion / Revised Letters
@@ -1180,7 +1331,8 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 • Offer Letter Assigned: <strong>${totals.olAssigned.toLocaleString()}</strong><br>
                 • Offer Letter Released: <strong>${totals.olReleased.toLocaleString()}</strong><br>
                 • Promotion Letter Released: <strong>${totals.promo.toLocaleString()}</strong><br>
-                • Revised Offer Letter Released: <strong>${totals.revisedOl.toLocaleString()}</strong>`;
+                • Revised Offer Letter Released: <strong>${totals.revisedOl.toLocaleString()}</strong><br>
+                • OL Released from All Clients: <strong>${totals.olAll.toLocaleString()}</strong>`;
             }
 
             // Calls
@@ -1192,20 +1344,22 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 • Not Connected: <strong>${totals.notConnected.toLocaleString()}</strong>`;
             }
 
-            // Docs & WhatsApp
-            if (q.includes('doc') || q.includes('whatsapp') || q.includes('wa') || q.includes('chat')) {
-                return `<strong>Docs & WhatsApp Queries:</strong><br>
+            // Docs, WhatsApp & Mails
+            if (q.includes('doc') || q.includes('whatsapp') || q.includes('wa') || q.includes('chat') || q.includes('mail')) {
+                return `<strong>Docs, WhatsApp & Mails:</strong><br>
                 • Documents Received: <strong>${totals.docs.toLocaleString()}</strong><br>
-                • WhatsApp Chats Cleared: <strong>${totals.wa.toLocaleString()}</strong>`;
+                • WhatsApp Chats Cleared: <strong>${totals.wa.toLocaleString()}</strong><br>
+                • Mails: <strong>${totals.mails.toLocaleString()}</strong>`;
             }
 
             // Default Full Summary
             return `<strong>Current View Summary (${filteredData.length} records):</strong><br>
             • Offer Letters: <strong>${totals.olReleased}</strong> released / ${totals.olAssigned} assigned<br>
             • Promo: <strong>${totals.promo}</strong> | Revised OL: <strong>${totals.revisedOl}</strong><br>
-            • Off-Boarding: <strong>${totals.offIssue}</strong> issued / ${totals.offAssign} assigned<br>
+            • Off-boarding: <strong>${totals.offIssue}</strong> issued / ${totals.offAssign} assigned<br>
             • Calls Connected: <strong>${totals.connected}</strong> / ${totals.callsAssigned}<br>
-            • Docs: <strong>${totals.docs}</strong> | WA Cleared: <strong>${totals.wa}</strong>`;
+            • Docs: <strong>${totals.docs}</strong> | WA: <strong>${totals.wa}</strong> | Mails: <strong>${totals.mails}</strong><br>
+            • All Clients Selections: <strong>${totals.selAll}</strong> | OL (All Clients): <strong>${totals.olAll}</strong>`;
         }
 
         function copyToClipboard(elementId, btnElement) {
