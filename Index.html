@@ -15,6 +15,8 @@
         .tab-content.active { display: block; }
         .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        #chatMessages::-webkit-scrollbar { width: 5px; }
+        #chatMessages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -433,7 +435,66 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH ONLY -->
+    <!-- FLOATING HR OPS CHATBOT WIDGET -->
+    <div id="hrChatbotContainer" class="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+        <!-- Chat Window -->
+        <div id="hrChatWindow" class="hidden mb-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <!-- Chat Header -->
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-blue-600 p-1.5 rounded-lg">
+                        <i class="fa-solid fa-robot text-xs text-white"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold tracking-wide">Canwin Ops Assistant</h4>
+                        <p class="text-[10px] text-emerald-400 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block"></span> Connected to Live Filter View
+                        </p>
+                    </div>
+                </div>
+                <button onclick="toggleChatbot()" class="text-slate-400 hover:text-white text-sm p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Messages Feed -->
+            <div id="chatMessages" class="p-3.5 h-72 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+                <div class="flex items-start space-x-2">
+                    <div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px]">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm leading-relaxed">
+                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>off-boarding</strong>, <strong>calls</strong>, <strong>top HR agent</strong>, or type an agent's name.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestion Chips -->
+            <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto">
+                <button onclick="sendQuickPrompt('Full summary')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Full Summary</button>
+                <button onclick="sendQuickPrompt('Offer & promotion letters')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Offer & Promo</button>
+                <button onclick="sendQuickPrompt('Off boarding stats')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Off-Boarding</button>
+                <button onclick="sendQuickPrompt('Top HR agent')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Top Agent</button>
+                <button onclick="sendQuickPrompt('Shift comparison')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">1st vs 2nd Half</button>
+            </div>
+
+            <!-- Input Area -->
+            <form onsubmit="handleChatSubmit(event)" class="p-2.5 bg-white border-t border-slate-200 flex items-center space-x-2">
+                <input type="text" id="chatInput" placeholder="Ask about metrics or an agent..." autocomplete="off" class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Floating Launcher Button -->
+        <button onclick="toggleChatbot()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-3 shadow-lg flex items-center space-x-2 transition transform hover:scale-105">
+            <i class="fa-solid fa-comment-dots text-base"></i>
+            <span class="text-xs font-bold">Ask HR Bot</span>
+        </button>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH & CHATBOT -->
     <script>
         // Global State Management
         let rawData = [];
@@ -453,7 +514,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             return isNaN(num) ? 0 : num;
         }
 
-        // Case-insensitive helper to safely extract column values regardless of capitalization
         function getRowValue(row, possibleKeys) {
             const rowKeys = Object.keys(row);
             for (const target of possibleKeys) {
@@ -584,7 +644,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 return matchStart && matchEnd && matchShift && matchAgent;
             });
 
-            // Update Active Filter Badge
             const badges = [];
             if (startDate && endDate) {
                 badges.push(`Dates: ${startDate} to ${endDate}`);
@@ -931,6 +990,166 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 if (v === 'w-total-docs') el.innerText = totalDocs;
                 if (v === 'weekRange') el.innerText = dateRangeText;
             });
+        }
+
+        // ================= CHATBOT ENGINE =================
+        function toggleChatbot() {
+            const win = document.getElementById('hrChatWindow');
+            win.classList.toggle('hidden');
+            if (!win.classList.contains('hidden')) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        function sendQuickPrompt(text) {
+            document.getElementById('chatInput').value = text;
+            handleChatSubmit(new Event('submit'));
+        }
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            appendChatMessage(msg, 'user');
+            input.value = '';
+
+            setTimeout(() => {
+                const reply = generateBotResponse(msg);
+                appendChatMessage(reply, 'bot');
+            }, 250);
+        }
+
+        function appendChatMessage(htmlContent, sender) {
+            const container = document.getElementById('chatMessages');
+            const wrapper = document.createElement('div');
+            wrapper.className = sender === 'user' ? 'flex justify-end' : 'flex items-start space-x-2';
+
+            if (sender === 'user') {
+                wrapper.innerHTML = `<div class="bg-blue-600 text-white rounded-xl rounded-tr-none px-3 py-2 max-w-[80%] shadow-sm">${escapeHtml(htmlContent)}</div>`;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px]">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm max-w-[85%] leading-relaxed">${htmlContent}</div>
+                `;
+            }
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function generateBotResponse(query) {
+            if (!filteredData || filteredData.length === 0) {
+                return "No records match the current filters (or CSV data hasn't loaded yet). Try clearing your filters or importing a CSV.";
+            }
+
+            const q = query.toLowerCase();
+
+            // Aggregate current filtered data
+            const totals = filteredData.reduce((acc, r) => {
+                acc.olAssigned += r.olAssigned;
+                acc.olReleased += r.olReleased;
+                acc.promo += r.promoReleased;
+                acc.revisedOl += r.revisedOlReleased;
+                acc.offAssign += r.offboardAssigned;
+                acc.offIssue += r.offboardIssued;
+                acc.callsAssigned += r.callsAssigned;
+                acc.connected += r.connectedCalls;
+                acc.notConnected += r.notConnectedCalls;
+                acc.docs += r.docsReceived;
+                acc.wa += r.whatsappCleared;
+                acc.nw += r.notWorking;
+                if (r.shift.includes('1')) { acc.h1OL += r.olReleased; acc.h1Calls += r.connectedCalls; }
+                if (r.shift.includes('2')) { acc.h2OL += r.olReleased; acc.h2Calls += r.connectedCalls; }
+                return acc;
+            }, {
+                olAssigned: 0, olReleased: 0, promo: 0, revisedOl: 0,
+                offAssign: 0, offIssue: 0, callsAssigned: 0, connected: 0,
+                notConnected: 0, docs: 0, wa: 0, nw: 0, h1OL: 0, h1Calls: 0, h2OL: 0, h2Calls: 0
+            });
+
+            // Check if query mentions a specific HR Agent name
+            const agents = [...new Set(filteredData.map(r => r.agent))];
+            const matchedAgent = agents.find(a => a.toLowerCase() !== 'unknown' && q.includes(a.toLowerCase()));
+            if (matchedAgent) {
+                const rows = filteredData.filter(r => r.agent === matchedAgent);
+                const ag = rows.reduce((a, r) => {
+                    a.olA += r.olAssigned; a.olR += r.olReleased; a.promo += r.promoReleased;
+                    a.rev += r.revisedOlReleased; a.offA += r.offboardAssigned; a.offI += r.offboardIssued;
+                    a.calls += r.connectedCalls; a.docs += r.docsReceived; a.wa += r.whatsappCleared;
+                    return a;
+                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0 });
+
+                return `<strong>${escapeHtml(matchedAgent)}</strong> (${rows.length} shift logs):<br>
+                • Offer Letters: <strong>${ag.olR}</strong> released / ${ag.olA} assigned<br>
+                • Promotion Letters: <strong>${ag.promo}</strong> | Revised OL: <strong>${ag.rev}</strong><br>
+                • Off-Boarding: <strong>${ag.offI}</strong> issued / ${ag.offA} assigned<br>
+                • Calls Connected: <strong>${ag.calls}</strong> | Docs: <strong>${ag.docs}</strong> | WA: <strong>${ag.wa}</strong>`;
+            }
+
+            // Top / Best Agent
+            if (q.includes('top') || q.includes('best') || q.includes('performer') || q.includes('highest')) {
+                const byAgent = {};
+                filteredData.forEach(r => {
+                    if (!byAgent[r.agent]) byAgent[r.agent] = { ol: 0, calls: 0, docs: 0 };
+                    byAgent[r.agent].ol += r.olReleased;
+                    byAgent[r.agent].calls += r.connectedCalls;
+                    byAgent[r.agent].docs += r.docsReceived;
+                });
+                const sorted = Object.entries(byAgent).sort((a, b) => b[1].ol - a[1].ol);
+                const [topName, topStats] = sorted[0];
+                return `🏆 <strong>Top Performer (by Offer Letters Released):</strong><br>
+                <strong>${escapeHtml(topName)}</strong> leads with <strong>${topStats.ol}</strong> offer letters released, <strong>${topStats.calls}</strong> connected calls, and <strong>${topStats.docs}</strong> documents processed.`;
+            }
+
+            // Shift Comparison
+            if (q.includes('shift') || q.includes('half') || q.includes('1st') || q.includes('2nd')) {
+                return `<strong>Shift Comparison:</strong><br>
+                • <strong>1st Half:</strong> ${totals.h1OL} OL Released | ${totals.h1Calls} Calls Connected<br>
+                • <strong>2nd Half:</strong> ${totals.h2OL} OL Released | ${totals.h2Calls} Calls Connected`;
+            }
+
+            // Off-boarding
+            if (q.includes('off') || q.includes('exit') || q.includes('boarding')) {
+                return `<strong>Off-Boarding Summary:</strong><br>
+                • Off Boarding Letter Assigned: <strong>${totals.offAssign.toLocaleString()}</strong><br>
+                • Off Boarding Letter Issued: <strong>${totals.offIssue.toLocaleString()}</strong>`;
+            }
+
+            // Offer / Promotion / Revised Letters
+            if (q.includes('offer') || q.includes('promo') || q.includes('revised') || q.includes('letter') || q.includes('ol')) {
+                return `<strong>Letters Breakdown (${filteredData.length} records):</strong><br>
+                • Offer Letter Assigned: <strong>${totals.olAssigned.toLocaleString()}</strong><br>
+                • Offer Letter Released: <strong>${totals.olReleased.toLocaleString()}</strong><br>
+                • Promotion Letter Released: <strong>${totals.promo.toLocaleString()}</strong><br>
+                • Revised Offer Letter Released: <strong>${totals.revisedOl.toLocaleString()}</strong>`;
+            }
+
+            // Calls
+            if (q.includes('call') || q.includes('connect')) {
+                const rate = totals.callsAssigned > 0 ? Math.round((totals.connected / totals.callsAssigned) * 100) : 0;
+                return `<strong>Call Performance:</strong><br>
+                • Total Calls Handled: <strong>${totals.callsAssigned.toLocaleString()}</strong><br>
+                • Connected: <strong>${totals.connected.toLocaleString()}</strong> (${rate}%)<br>
+                • Not Connected: <strong>${totals.notConnected.toLocaleString()}</strong>`;
+            }
+
+            // Docs & WhatsApp
+            if (q.includes('doc') || q.includes('whatsapp') || q.includes('wa') || q.includes('chat')) {
+                return `<strong>Docs & WhatsApp Queries:</strong><br>
+                • Documents Received: <strong>${totals.docs.toLocaleString()}</strong><br>
+                • WhatsApp Chats Cleared: <strong>${totals.wa.toLocaleString()}</strong>`;
+            }
+
+            // Default Full Summary
+            return `<strong>Current View Summary (${filteredData.length} records):</strong><br>
+            • Offer Letters: <strong>${totals.olReleased}</strong> released / ${totals.olAssigned} assigned<br>
+            • Promo: <strong>${totals.promo}</strong> | Revised OL: <strong>${totals.revisedOl}</strong><br>
+            • Off-Boarding: <strong>${totals.offIssue}</strong> issued / ${totals.offAssign} assigned<br>
+            • Calls Connected: <strong>${totals.connected}</strong> / ${totals.callsAssigned}<br>
+            • Docs: <strong>${totals.docs}</strong> | WA Cleared: <strong>${totals.wa}</strong>`;
         }
 
         function copyToClipboard(elementId, btnElement) {
