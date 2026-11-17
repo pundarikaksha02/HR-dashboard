@@ -85,14 +85,6 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Shift</label>
-                    <select id="shiftFilter" onchange="applyFilters()" class="border-slate-300 rounded-lg text-xs border py-1.5 px-2.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                        <option value="all">All Shifts</option>
-                        <option value="1st Half">1st Half</option>
-                        <option value="2nd Half">2nd Half</option>
-                    </select>
-                </div>
-                <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">HR Agent</label>
                     <select id="agentFilter" onchange="applyFilters()" class="border-slate-300 rounded-lg text-xs border py-1.5 px-2.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
                         <option value="all">All Agents</option>
@@ -286,7 +278,7 @@
                     </h3>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="h-64"><canvas id="shiftChart"></canvas></div>
+                    <div class="h-64"><canvas id="lettersChart"></canvas></div>
                     <div class="h-64"><canvas id="callStatusChart"></canvas></div>
                 </div>
             </div>
@@ -307,7 +299,6 @@
                         <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
                                 <th class="px-3 py-3 text-left">HR Agent</th>
-                                <th class="px-3 py-3 text-left">Shift</th>
                                 <th class="px-3 py-3 text-center">OL Assigned</th>
                                 <th class="px-3 py-3 text-center">OL Released</th>
                                 <th class="px-3 py-3 text-center">Promo Released</th>
@@ -453,10 +444,6 @@
 CANWIN HR OPERATIONS DAILY DIGEST
 Date: <span class="template-var" data-var="currentDate">[Date]</span>
 
-Shift Distribution:
-- 1st Half OL Released: <span class="template-var" data-var="dh1-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh1-calls">0</span>
-- 2nd Half OL Released: <span class="template-var" data-var="dh2-ol">0</span> | Calls Connected: <span class="template-var" data-var="dh2-calls">0</span>
-
 Total Performance Metrics:
 - Offer Letters Assigned: <span class="template-var" data-var="total-ol-assigned">0</span>
 - Offer Letters Released: <span class="template-var" data-var="total-ol">0</span>
@@ -601,7 +588,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         // Global State Management
         let rawData = [];
         let filteredData = [];
-        let shiftChartInstance = null;
+        let lettersChartInstance = null;
         let callChartInstance = null;
         let weeklyChartInstance = null;
         let monthlyOutputChart = null;
@@ -695,7 +682,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                             date: formatDate(getRowValue(row, ['Timestamp'])),
                             email: (getRowValue(row, ['Email address']) || '').trim().toLowerCase(),
                             agent: (getRowValue(row, ['OB HR Name']) || 'Unknown').trim(),
-                            shift: (getRowValue(row, ['Shift/Half', 'Shift']) || 'All Shifts').trim(),
                             olAssigned: parseNumeric(getRowValue(row, ['OL Assigned'])),
                             olReleased: parseNumeric(getRowValue(row, ['OL Released'])),
                             callsAssigned: parseNumeric(getRowValue(row, ['Calls Assigned'])),
@@ -756,15 +742,13 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         function applyFilters() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-            const selectedShift = document.getElementById('shiftFilter').value;
             const selectedAgent = document.getElementById('agentFilter').value;
 
             filteredData = rawData.filter(item => {
                 const matchStart = !startDate || (item.date !== 'Unknown' && item.date >= startDate);
                 const matchEnd = !endDate || (item.date !== 'Unknown' && item.date <= endDate);
-                const matchShift = (selectedShift === 'all' || item.shift === selectedShift);
                 const matchAgent = (selectedAgent === 'all' || item.agent.toLowerCase() === selectedAgent.toLowerCase());
-                return matchStart && matchEnd && matchShift && matchAgent;
+                return matchStart && matchEnd && matchAgent;
             });
 
             const badges = [];
@@ -775,7 +759,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             } else if (endDate) {
                 badges.push(`Until: ${endDate}`);
             }
-            if (selectedShift !== 'all') badges.push(selectedShift);
             if (selectedAgent !== 'all') badges.push(`Agent: ${selectedAgent}`);
             document.getElementById('activeFiltersBadge').innerText = badges.length > 0 ? `Filtering by [ ${badges.join(' | ')} ]` : `Showing live dataset (${rawData.length} records)`;
 
@@ -785,7 +768,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         function clearFilters() {
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
-            document.getElementById('shiftFilter').value = 'all';
             document.getElementById('agentFilter').value = 'all';
             applyFilters();
         }
@@ -793,7 +775,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         function resetDashboard() {
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
-            document.getElementById('shiftFilter').value = 'all';
             document.getElementById('agentFilter').value = 'all';
             initLiveCSVData();
         }
@@ -813,7 +794,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             document.getElementById(`content-${tabId}`).classList.add('active');
 
             setTimeout(() => {
-                if (shiftChartInstance) shiftChartInstance.resize();
+                if (lettersChartInstance) lettersChartInstance.resize();
                 if (callChartInstance) callChartInstance.resize();
                 if (weeklyChartInstance) weeklyChartInstance.resize();
                 if (monthlyOutputChart) monthlyOutputChart.resize();
@@ -896,7 +877,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
                     <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap">${escapeHtml(row.agent)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap"><span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full ${row.shift === '1st Half' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">${escapeHtml(row.shift)}</span></td>
                     <td class="px-3 py-3 text-center text-slate-600">${row.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
                     <td class="px-3 py-3 text-center font-bold text-indigo-600">${row.promoReleased}</td>
@@ -918,35 +898,36 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 tbody.appendChild(tr);
             });
 
-            let h1OL = 0, h1Calls = 0, h2OL = 0, h2Calls = 0;
-            filteredData.forEach(row => {
-                if (row.shift.includes('1')) {
-                    h1OL += row.olReleased;
-                    h1Calls += row.connectedCalls;
-                } else if (row.shift.includes('2')) {
-                    h2OL += row.olReleased;
-                    h2Calls += row.connectedCalls;
-                }
+            let sumOLAssigned = 0, sumOLReleased = 0, sumPromo = 0, sumRevised = 0, sumOffboardIssued = 0;
+            let totalConn = 0, totalNotConn = 0;
+            filteredData.forEach(r => {
+                sumOLAssigned += r.olAssigned;
+                sumOLReleased += r.olReleased;
+                sumPromo += r.promoReleased;
+                sumRevised += r.revisedOlReleased;
+                sumOffboardIssued += r.offboardIssued;
+                totalConn += r.connectedCalls;
+                totalNotConn += r.notConnectedCalls;
             });
 
-            if (shiftChartInstance) shiftChartInstance.destroy();
+            if (lettersChartInstance) lettersChartInstance.destroy();
             if (callChartInstance) callChartInstance.destroy();
 
-            const shiftCtx = document.getElementById('shiftChart').getContext('2d');
-            shiftChartInstance = new Chart(shiftCtx, {
+            const lettersCtx = document.getElementById('lettersChart').getContext('2d');
+            lettersChartInstance = new Chart(lettersCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Offer Letters Released', 'Calls Connected'],
-                    datasets: [
-                        { label: '1st Half', data: [h1OL, h1Calls], backgroundColor: '#2563eb', borderRadius: 4 },
-                        { label: '2nd Half', data: [h2OL, h2Calls], backgroundColor: '#3b82f6', borderRadius: 4 }
-                    ]
+                    labels: ['OL Assigned', 'OL Released', 'Promo Released', 'Revised OL', 'Off-boarding Issued'],
+                    datasets: [{
+                        label: 'Letter Volume',
+                        data: [sumOLAssigned, sumOLReleased, sumPromo, sumRevised, sumOffboardIssued],
+                        backgroundColor: ['#2563eb', '#0ea5e9', '#4f46e5', '#0891b2', '#f43f5e'],
+                        borderRadius: 4
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            let totalConn = 0, totalNotConn = 0;
-            filteredData.forEach(r => { totalConn += r.connectedCalls; totalNotConn += r.notConnectedCalls; });
             const callCtx = document.getElementById('callStatusChart').getContext('2d');
             callChartInstance = new Chart(callCtx, {
                 type: 'doughnut',
@@ -1106,7 +1087,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
         // Automated Template Placeholders Update Logic
         function updateTemplatePlaceholders() {
-            let h1OL = 0, h1Calls = 0, h2OL = 0, h2Calls = 0;
             let totalOLAssigned = 0, totalOL = 0, totalCalls = 0, totalDocs = 0, totalWA = 0, totalMails = 0;
             let totalPromo = 0, totalRevisedOL = 0, totalOffboardAssigned = 0, totalOffboardIssued = 0;
             let totalSelAll = 0, totalOlAll = 0, totalOverallD = 0, totalOverallSS = 0;
@@ -1126,14 +1106,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 totalOlAll += row.olAllClients;
                 totalOverallD += row.overallSelectionsD;
                 totalOverallSS += row.overallSelectionsSS;
-
-                if (row.shift.includes('1')) {
-                    h1OL += row.olReleased;
-                    h1Calls += row.connectedCalls;
-                } else if (row.shift.includes('2')) {
-                    h2OL += row.olReleased;
-                    h2Calls += row.connectedCalls;
-                }
             });
 
             const uniqueDates = [...new Set(filteredData.map(r => r.date))].sort();
@@ -1142,10 +1114,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             document.querySelectorAll('#templateModal .template-var').forEach(el => {
                 const v = el.getAttribute('data-var');
                 if (v === 'currentDate') el.innerText = new Date().toLocaleDateString();
-                if (v === 'dh1-ol') el.innerText = h1OL;
-                if (v === 'dh1-calls') el.innerText = h1Calls;
-                if (v === 'dh2-ol') el.innerText = h2OL;
-                if (v === 'dh2-calls') el.innerText = h2Calls;
                 if (v === 'total-ol-assigned') el.innerText = totalOLAssigned;
                 if (v === 'total-ol') el.innerText = totalOL;
                 if (v === 'total-promo') el.innerText = totalPromo;
@@ -1277,14 +1245,12 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 acc.olAll += r.olAllClients;
                 acc.ovD += r.overallSelectionsD;
                 acc.ovSS += r.overallSelectionsSS;
-                if (r.shift.includes('1')) { acc.h1OL += r.olReleased; acc.h1Calls += r.connectedCalls; }
-                if (r.shift.includes('2')) { acc.h2OL += r.olReleased; acc.h2Calls += r.connectedCalls; }
                 return acc;
             }, {
                 olAssigned: 0, olReleased: 0, promo: 0, revisedOl: 0,
                 offAssign: 0, offIssue: 0, callsAssigned: 0, connected: 0,
                 notConnected: 0, docs: 0, wa: 0, mails: 0, nw: 0,
-                selAll: 0, olAll: 0, ovD: 0, ovSS: 0, h1OL: 0, h1Calls: 0, h2OL: 0, h2Calls: 0
+                selAll: 0, olAll: 0, ovD: 0, ovSS: 0
             });
 
             // Top / Best Agent
@@ -1309,13 +1275,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 • OL Released from All Clients: <strong>${totals.olAll.toLocaleString()}</strong><br>
                 • Overall Selections (All Client) [d]: <strong>${totals.ovD.toLocaleString()}</strong><br>
                 • Overall Selections (All Client) [ss]: <strong>${totals.ovSS.toLocaleString()}</strong>`;
-            }
-
-            // Shift Comparison
-            if (q.includes('shift') || q.includes('half') || q.includes('1st') || q.includes('2nd')) {
-                return `<strong>Shift Comparison:</strong><br>
-                • <strong>1st Half:</strong> ${totals.h1OL} OL Released | ${totals.h1Calls} Calls Connected<br>
-                • <strong>2nd Half:</strong> ${totals.h2OL} OL Released | ${totals.h2Calls} Calls Connected`;
             }
 
             // Off-boarding
