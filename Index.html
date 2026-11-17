@@ -464,7 +464,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm leading-relaxed">
-                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>off-boarding</strong>, <strong>calls</strong>, <strong>top HR agent</strong>, or type an agent's name.
+                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>off-boarding</strong>, <strong>calls</strong>, <strong>top HR agent</strong>, or type an agent's name (e.g., <strong>Balaji K</strong>, <strong>Priyanka</strong>, <strong>Roshan H R</strong>).
                     </div>
                 </div>
             </div>
@@ -496,6 +496,19 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
     <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH & CHATBOT -->
     <script>
+        // Pre-configured HR Team Roster
+        const DEFAULT_HR_AGENTS = [
+            'Balaji K',
+            'Manoj Kumar',
+            'Jabeer Khan',
+            'Priyanka',
+            'Nikitha Ramesh Rugi',
+            'Vijaykanth',
+            'Mohammad Farhan',
+            'Mohammad Afshan',
+            'Roshan H R'
+        ];
+
         // Global State Management
         let rawData = [];
         let filteredData = [];
@@ -537,6 +550,8 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
         // Core App Initialization
         document.addEventListener('DOMContentLoaded', () => {
+            populateFilterDropdowns();
+            renderMonthlyView();
             setupEventListeners();
             initLiveCSVData();
         });
@@ -618,8 +633,13 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         }
 
         // UI & Filter Management
+        function getAllKnownAgents() {
+            const csvAgents = rawData.map(item => item.agent).filter(a => a && a !== 'Unknown');
+            return [...new Set([...DEFAULT_HR_AGENTS, ...csvAgents])].sort();
+        }
+
         function populateFilterDropdowns() {
-            const agents = [...new Set(rawData.map(item => item.agent))].sort();
+            const agents = getAllKnownAgents();
 
             const agentSelect = document.getElementById('agentFilter');
             const currentSelectedAgent = agentSelect.value;
@@ -640,7 +660,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const matchStart = !startDate || (item.date !== 'Unknown' && item.date >= startDate);
                 const matchEnd = !endDate || (item.date !== 'Unknown' && item.date <= endDate);
                 const matchShift = (selectedShift === 'all' || item.shift === selectedShift);
-                const matchAgent = (selectedAgent === 'all' || item.agent === selectedAgent);
+                const matchAgent = (selectedAgent === 'all' || item.agent.toLowerCase() === selectedAgent.toLowerCase());
                 return matchStart && matchEnd && matchShift && matchAgent;
             });
 
@@ -876,30 +896,39 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             });
         }
 
-        // Render Monthly View
+        // Render Monthly View (Always includes all 9 pre-configured HR Agents)
         function renderMonthlyView() {
+            const selectedAgent = document.getElementById('agentFilter').value;
             const agentSummary = {};
 
+            // Initialize roster agents with 0s so all team members appear
+            const rosterToShow = selectedAgent === 'all' ? getAllKnownAgents() : [selectedAgent];
+            rosterToShow.forEach(agentName => {
+                agentSummary[agentName] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
+            });
+
             filteredData.forEach(row => {
-                if (!agentSummary[row.agent]) {
-                    agentSummary[row.agent] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
+                const matchedKey = Object.keys(agentSummary).find(k => k.toLowerCase() === row.agent.toLowerCase()) || row.agent;
+                if (!agentSummary[matchedKey]) {
+                    agentSummary[matchedKey] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, nw: 0 };
                 }
-                agentSummary[row.agent].olAssigned += row.olAssigned;
-                agentSummary[row.agent].ol += row.olReleased;
-                agentSummary[row.agent].promo += row.promoReleased;
-                agentSummary[row.agent].revisedOl += row.revisedOlReleased;
-                agentSummary[row.agent].offAssign += row.offboardAssigned;
-                agentSummary[row.agent].offIssue += row.offboardIssued;
-                agentSummary[row.agent].calls += row.connectedCalls;
-                agentSummary[row.agent].docs += row.docsReceived;
-                agentSummary[row.agent].wa += row.whatsappCleared;
-                agentSummary[row.agent].nw += row.notWorking;
+                agentSummary[matchedKey].olAssigned += row.olAssigned;
+                agentSummary[matchedKey].ol += row.olReleased;
+                agentSummary[matchedKey].promo += row.promoReleased;
+                agentSummary[matchedKey].revisedOl += row.revisedOlReleased;
+                agentSummary[matchedKey].offAssign += row.offboardAssigned;
+                agentSummary[matchedKey].offIssue += row.offboardIssued;
+                agentSummary[matchedKey].calls += row.connectedCalls;
+                agentSummary[matchedKey].docs += row.docsReceived;
+                agentSummary[matchedKey].wa += row.whatsappCleared;
+                agentSummary[matchedKey].nw += row.notWorking;
             });
 
             const tbody = document.getElementById('table-monthly-body');
             tbody.innerHTML = '';
 
-            Object.keys(agentSummary).sort().forEach(agent => {
+            const sortedAgents = Object.keys(agentSummary).sort();
+            sortedAgents.forEach(agent => {
                 const s = agentSummary[agent];
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
@@ -924,11 +953,11 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             monthlyOutputChart = new Chart(monthlyCtx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(agentSummary).sort(),
+                    labels: sortedAgents,
                     datasets: [
-                        { label: 'Offer Letters Released', data: Object.keys(agentSummary).sort().map(a => agentSummary[a].ol), backgroundColor: '#2563eb', borderRadius: 4 },
-                        { label: 'Connected Calls', data: Object.keys(agentSummary).sort().map(a => agentSummary[a].calls), backgroundColor: '#10b981', borderRadius: 4 },
-                        { label: 'Documents Processed', data: Object.keys(agentSummary).sort().map(a => agentSummary[a].docs), backgroundColor: '#f59e0b', borderRadius: 4 }
+                        { label: 'Offer Letters Released', data: sortedAgents.map(a => agentSummary[a].ol), backgroundColor: '#2563eb', borderRadius: 4 },
+                        { label: 'Connected Calls', data: sortedAgents.map(a => agentSummary[a].calls), backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Documents Processed', data: sortedAgents.map(a => agentSummary[a].docs), backgroundColor: '#f59e0b', borderRadius: 4 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
@@ -1041,11 +1070,37 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         }
 
         function generateBotResponse(query) {
+            const q = query.toLowerCase();
+
+            // Check if query mentions any known HR Agent (including the 9 pre-configured agents)
+            const allAgents = getAllKnownAgents();
+            const matchedAgent = allAgents.find(a => q.includes(a.toLowerCase()));
+            if (matchedAgent) {
+                const rows = filteredData.filter(r => r.agent.toLowerCase() === matchedAgent.toLowerCase());
+                if (rows.length === 0) {
+                    return `<strong>${escapeHtml(matchedAgent)}</strong> currently has <strong>0 records</strong> in the active filter view.`;
+                }
+                const ag = rows.reduce((a, r) => {
+                    a.olA += r.olAssigned; a.olR += r.olReleased; a.promo += r.promoReleased;
+                    a.rev += r.revisedOlReleased; a.offA += r.offboardAssigned; a.offI += r.offboardIssued;
+                    a.calls += r.connectedCalls; a.docs += r.docsReceived; a.wa += r.whatsappCleared;
+                    return a;
+                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0 });
+
+                return `<strong>${escapeHtml(matchedAgent)}</strong> (${rows.length} shift logs):<br>
+                • Offer Letters: <strong>${ag.olR}</strong> released / ${ag.olA} assigned<br>
+                • Promotion Letters: <strong>${ag.promo}</strong> | Revised OL: <strong>${ag.rev}</strong><br>
+                • Off-Boarding: <strong>${ag.offI}</strong> issued / ${ag.offA} assigned<br>
+                • Calls Connected: <strong>${ag.calls}</strong> | Docs: <strong>${ag.docs}</strong> | WA: <strong>${ag.wa}</strong>`;
+            }
+
+            if (q.includes('team') || q.includes('agent list') || q.includes('employees') || q.includes('roster')) {
+                return `<strong>HR Operations Team (${allAgents.length} Agents):</strong><br>• ${allAgents.map(a => escapeHtml(a)).join('<br>• ')}`;
+            }
+
             if (!filteredData || filteredData.length === 0) {
                 return "No records match the current filters (or CSV data hasn't loaded yet). Try clearing your filters or importing a CSV.";
             }
-
-            const q = query.toLowerCase();
 
             // Aggregate current filtered data
             const totals = filteredData.reduce((acc, r) => {
@@ -1069,25 +1124,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 offAssign: 0, offIssue: 0, callsAssigned: 0, connected: 0,
                 notConnected: 0, docs: 0, wa: 0, nw: 0, h1OL: 0, h1Calls: 0, h2OL: 0, h2Calls: 0
             });
-
-            // Check if query mentions a specific HR Agent name
-            const agents = [...new Set(filteredData.map(r => r.agent))];
-            const matchedAgent = agents.find(a => a.toLowerCase() !== 'unknown' && q.includes(a.toLowerCase()));
-            if (matchedAgent) {
-                const rows = filteredData.filter(r => r.agent === matchedAgent);
-                const ag = rows.reduce((a, r) => {
-                    a.olA += r.olAssigned; a.olR += r.olReleased; a.promo += r.promoReleased;
-                    a.rev += r.revisedOlReleased; a.offA += r.offboardAssigned; a.offI += r.offboardIssued;
-                    a.calls += r.connectedCalls; a.docs += r.docsReceived; a.wa += r.whatsappCleared;
-                    return a;
-                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0 });
-
-                return `<strong>${escapeHtml(matchedAgent)}</strong> (${rows.length} shift logs):<br>
-                • Offer Letters: <strong>${ag.olR}</strong> released / ${ag.olA} assigned<br>
-                • Promotion Letters: <strong>${ag.promo}</strong> | Revised OL: <strong>${ag.rev}</strong><br>
-                • Off-Boarding: <strong>${ag.offI}</strong> issued / ${ag.offA} assigned<br>
-                • Calls Connected: <strong>${ag.calls}</strong> | Docs: <strong>${ag.docs}</strong> | WA: <strong>${ag.wa}</strong>`;
-            }
 
             // Top / Best Agent
             if (q.includes('top') || q.includes('best') || q.includes('performer') || q.includes('highest')) {
