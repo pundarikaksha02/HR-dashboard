@@ -215,8 +215,8 @@
             </div>
         </div>
 
-        <!-- KPI Summary Cards (Row 3: Mails & All Clients Selections) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI Summary Cards (Row 3: Mails, All Clients Selections & Other Works) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-slate-600">
                 <div class="flex items-center justify-between">
                     <div>
@@ -262,6 +262,18 @@
                     </div>
                     <div class="bg-fuchsia-50 p-2.5 rounded-lg">
                         <i class="fa-solid fa-chart-pie text-fuchsia-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-lime-600">
+                <div class="flex items-center justify-between">
+                    <div class="min-w-0 pr-2">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Other Works</p>
+                        <h3 id="stat-other-works-count" class="text-xl font-bold text-slate-800 mt-1">0</h3>
+                        <p id="stat-other-works-latest" class="text-xs text-slate-500 mt-0.5 truncate" title="No entries logged">Logged Entries</p>
+                    </div>
+                    <div class="bg-lime-50 p-2.5 rounded-lg flex-shrink-0">
+                        <i class="fa-solid fa-list-check text-lime-600 text-sm"></i>
                     </div>
                 </div>
             </div>
@@ -316,6 +328,7 @@
                                 <th class="px-3 py-3 text-center">OL Rel. (All)</th>
                                 <th class="px-3 py-3 text-center">Overall [d]</th>
                                 <th class="px-3 py-3 text-center">Overall [ss]</th>
+                                <th class="px-3 py-3 text-left">Other Works</th>
                             </tr>
                         </thead>
                         <tbody id="table-daily-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -409,6 +422,7 @@
                                 <th class="px-3 py-3 text-center">OL Rel. (All)</th>
                                 <th class="px-3 py-3 text-center">Overall [d]</th>
                                 <th class="px-3 py-3 text-center">Overall [ss]</th>
+                                <th class="px-3 py-3 text-left">Other Works</th>
                             </tr>
                         </thead>
                         <tbody id="table-monthly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -461,6 +475,9 @@ All Clients Selection Summary:
 - OL Released From All Clients: <span class="template-var" data-var="total-ol-all">0</span>
 - Overall Selections (All Client) [d]: <span class="template-var" data-var="total-overall-d">0</span>
 - Overall Selections (All Client) [ss]: <span class="template-var" data-var="total-overall-ss">0</span>
+
+Other Works / Additional Notes:
+<span class="template-var" data-var="total-other-works">None</span>
 
 Summary Note: Operational metrics successfully compiled via Canwin Dashboard Engine.
                     </pre>
@@ -528,7 +545,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm leading-relaxed">
-                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>selections</strong>, <strong>off-boarding</strong>, <strong>mails</strong>, <strong>top HR agent</strong>, or type an agent's name.
+                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>selections</strong>, <strong>off-boarding</strong>, <strong>other works</strong>, <strong>top HR agent</strong>, or type an agent's name.
                     </div>
                 </div>
             </div>
@@ -537,7 +554,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto">
                 <button onclick="sendQuickPrompt('Full summary')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Full Summary</button>
                 <button onclick="sendQuickPrompt('Client selections')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">All Clients Selections</button>
-                <button onclick="sendQuickPrompt('Offer & promotion letters')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Offer & Promo</button>
+                <button onclick="sendQuickPrompt('Other works')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Other Works</button>
                 <button onclick="sendQuickPrompt('Off boarding stats')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Off-Boarding</button>
                 <button onclick="sendQuickPrompt('Top HR agent')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Top Agent</button>
             </div>
@@ -695,7 +712,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                             revisedOlReleased: parseNumeric(getRowValue(row, ['Revised Offer Letter Released'])),
                             offboardAssigned: parseNumeric(getRowValue(row, ['Off-boarding Letter Assigned', 'Off Boarding Letter Assigned'])),
                             offboardIssued: parseNumeric(getRowValue(row, ['Off-boarding Letter Issued', 'Off Boarding Letter Issued'])),
-                            otherWorks: getRowValue(row, ['Other Works']) || '',
+                            otherWorks: String(getRowValue(row, ['Other Works', 'Other Work']) || '').trim(),
                             selectionsAllClients: parseNumeric(getRowValue(row, ['Selections Received From All Clients'])),
                             olAllClients: parseNumeric(getRowValue(row, ['OL Released from All Clients'])),
                             overallSelectionsD: parseNumeric(getRowValue(row, ['Overall Selections (All Client) [d]'])),
@@ -828,6 +845,8 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             let totalPromo = 0, totalRevisedOL = 0;
             let totalOffboardAssigned = 0, totalOffboardIssued = 0;
             let totalSelAll = 0, totalOlAll = 0, totalOverallD = 0, totalOverallSS = 0;
+            let otherWorksCount = 0;
+            let latestOtherWork = '';
 
             filteredData.forEach(row => {
                 totalOLAssigned += row.olAssigned;
@@ -845,6 +864,10 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 totalOlAll += row.olAllClients;
                 totalOverallD += row.overallSelectionsD;
                 totalOverallSS += row.overallSelectionsSS;
+                if (row.otherWorks) {
+                    otherWorksCount++;
+                    latestOtherWork = `${row.agent}: ${row.otherWorks}`;
+                }
             });
 
             document.getElementById('stat-ol-assigned').innerText = totalOLAssigned.toLocaleString();
@@ -865,6 +888,16 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             document.getElementById('stat-ol-all-clients').innerText = totalOlAll.toLocaleString();
             document.getElementById('stat-overall-d').innerText = totalOverallD.toLocaleString();
             document.getElementById('stat-overall-ss').innerText = totalOverallSS.toLocaleString();
+
+            document.getElementById('stat-other-works-count').innerText = otherWorksCount.toLocaleString();
+            const latestEl = document.getElementById('stat-other-works-latest');
+            if (otherWorksCount > 0) {
+                latestEl.innerText = latestOtherWork;
+                latestEl.title = latestOtherWork;
+            } else {
+                latestEl.innerText = 'Logged Entries';
+                latestEl.title = 'No entries logged';
+            }
         }
 
         // Render Daily View
@@ -894,6 +927,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     <td class="px-3 py-3 text-center font-bold text-violet-600">${row.olAllClients}</td>
                     <td class="px-3 py-3 text-center font-bold text-fuchsia-600">${row.overallSelectionsD}</td>
                     <td class="px-3 py-3 text-center font-bold text-fuchsia-700">${row.overallSelectionsSS}</td>
+                    <td class="px-3 py-3 text-left text-slate-600 max-w-xs truncate" title="${escapeHtml(row.otherWorks)}">${escapeHtml(row.otherWorks || '-')}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1008,20 +1042,20 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             });
         }
 
-        // Render Monthly View (Includes all 21 pre-configured HR Agents)
+        // Render Monthly View (Includes all 21 pre-configured HR Agents + Other Works)
         function renderMonthlyView() {
             const selectedAgent = document.getElementById('agentFilter').value;
             const agentSummary = {};
 
             const rosterToShow = selectedAgent === 'all' ? getAllKnownAgents() : [selectedAgent];
             rosterToShow.forEach(agentName => {
-                agentSummary[agentName] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, mails: 0, nw: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0 };
+                agentSummary[agentName] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, mails: 0, nw: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0, otherWorksSet: new Set() };
             });
 
             filteredData.forEach(row => {
                 const matchedKey = Object.keys(agentSummary).find(k => k.toLowerCase() === row.agent.toLowerCase()) || row.agent;
                 if (!agentSummary[matchedKey]) {
-                    agentSummary[matchedKey] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, mails: 0, nw: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0 };
+                    agentSummary[matchedKey] = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, mails: 0, nw: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0, otherWorksSet: new Set() };
                 }
                 agentSummary[matchedKey].olAssigned += row.olAssigned;
                 agentSummary[matchedKey].ol += row.olReleased;
@@ -1038,6 +1072,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 agentSummary[matchedKey].olAll += row.olAllClients;
                 agentSummary[matchedKey].ovD += row.overallSelectionsD;
                 agentSummary[matchedKey].ovSS += row.overallSelectionsSS;
+                if (row.otherWorks) {
+                    agentSummary[matchedKey].otherWorksSet.add(row.otherWorks);
+                }
             });
 
             const tbody = document.getElementById('table-monthly-body');
@@ -1046,6 +1083,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             const sortedAgents = Object.keys(agentSummary).sort((a, b) => a.localeCompare(b));
             sortedAgents.forEach(agent => {
                 const s = agentSummary[agent];
+                const combinedOtherWorks = s.otherWorksSet.size > 0 ? [...s.otherWorksSet].join(' | ') : '-';
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
@@ -1065,6 +1103,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     <td class="px-3 py-3 text-center font-bold text-violet-600">${s.olAll}</td>
                     <td class="px-3 py-3 text-center font-bold text-fuchsia-600">${s.ovD}</td>
                     <td class="px-3 py-3 text-center font-bold text-fuchsia-700">${s.ovSS}</td>
+                    <td class="px-3 py-3 text-left text-slate-600 max-w-xs truncate" title="${escapeHtml(combinedOtherWorks)}">${escapeHtml(combinedOtherWorks)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1090,6 +1129,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             let totalOLAssigned = 0, totalOL = 0, totalCalls = 0, totalDocs = 0, totalWA = 0, totalMails = 0;
             let totalPromo = 0, totalRevisedOL = 0, totalOffboardAssigned = 0, totalOffboardIssued = 0;
             let totalSelAll = 0, totalOlAll = 0, totalOverallD = 0, totalOverallSS = 0;
+            const otherWorksList = [];
 
             filteredData.forEach(row => {
                 totalOLAssigned += row.olAssigned;
@@ -1106,6 +1146,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 totalOlAll += row.olAllClients;
                 totalOverallD += row.overallSelectionsD;
                 totalOverallSS += row.overallSelectionsSS;
+                if (row.otherWorks) {
+                    otherWorksList.push(`- ${row.agent}: ${row.otherWorks}`);
+                }
             });
 
             const uniqueDates = [...new Set(filteredData.map(r => r.date))].sort();
@@ -1128,6 +1171,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 if (v === 'total-ol-all') el.innerText = totalOlAll;
                 if (v === 'total-overall-d') el.innerText = totalOverallD;
                 if (v === 'total-overall-ss') el.innerText = totalOverallSS;
+                if (v === 'total-other-works') el.innerText = otherWorksList.length > 0 ? otherWorksList.join('\n') : 'None';
                 if (v === 'w-total-ol-assigned') el.innerText = totalOLAssigned;
                 if (v === 'w-total-ol') el.innerText = totalOL;
                 if (v === 'w-total-promo') el.innerText = totalPromo;
@@ -1207,15 +1251,18 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     a.rev += r.revisedOlReleased; a.offA += r.offboardAssigned; a.offI += r.offboardIssued;
                     a.calls += r.connectedCalls; a.docs += r.docsReceived; a.wa += r.whatsappCleared;
                     a.mails += r.mails; a.sel += r.selectionsAllClients; a.olAll += r.olAllClients;
+                    if (r.otherWorks) a.works.add(r.otherWorks);
                     return a;
-                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0, mails: 0, sel: 0, olAll: 0 });
+                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0, mails: 0, sel: 0, olAll: 0, works: new Set() });
 
+                const worksText = ag.works.size > 0 ? escapeHtml([...ag.works].join(', ')) : 'None';
                 return `<strong>${escapeHtml(matchedAgent)}</strong> (${rows.length} logs):<br>
                 • Offer Letters: <strong>${ag.olR}</strong> released / ${ag.olA} assigned<br>
                 • Promotion: <strong>${ag.promo}</strong> | Revised OL: <strong>${ag.rev}</strong><br>
                 • Off-boarding: <strong>${ag.offI}</strong> issued / ${ag.offA} assigned<br>
                 • Calls Connected: <strong>${ag.calls}</strong> | Docs: <strong>${ag.docs}</strong> | WA: <strong>${ag.wa}</strong> | Mails: <strong>${ag.mails}</strong><br>
-                • All Clients Selections: <strong>${ag.sel}</strong> | OL (All Clients): <strong>${ag.olAll}</strong>`;
+                • All Clients Selections: <strong>${ag.sel}</strong> | OL (All Clients): <strong>${ag.olAll}</strong><br>
+                • Other Works: <strong>${worksText}</strong>`;
             }
 
             if (q.includes('team') || q.includes('agent list') || q.includes('employees') || q.includes('roster')) {
@@ -1224,6 +1271,15 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
             if (!filteredData || filteredData.length === 0) {
                 return "No records match the current filters (or CSV data hasn't loaded yet). Try clearing your filters or importing a CSV.";
+            }
+
+            // Other Works query
+            if (q.includes('other') || q.includes('work') || q.includes('task') || q.includes('note')) {
+                const works = filteredData.filter(r => r.otherWorks).map(r => `• <strong>${escapeHtml(r.agent)}</strong> (${escapeHtml(r.date)}): ${escapeHtml(r.otherWorks)}`);
+                if (works.length === 0) {
+                    return "No <strong>Other Works</strong> entries are logged in the current view.";
+                }
+                return `<strong>Other Works Logged (${works.length}):</strong><br>${works.slice(0, 10).join('<br>')}${works.length > 10 ? `<br><em>...and ${works.length - 10} more</em>` : ''}`;
             }
 
             // Aggregate current filtered data
