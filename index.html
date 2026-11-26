@@ -35,12 +35,15 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-emerald-400 bg-slate-800 px-2.5 py-1 rounded-full">
+                        <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live Auto-Sync (15s)
+                    </span>
                     <label class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition flex items-center space-x-1.5 shadow-sm">
                         <i class="fa-solid fa-upload"></i>
                         <span>Import CSV</span>
                         <input type="file" id="csvFileInput" accept=".csv" class="hidden">
                     </label>
-                    <button onclick="resetDashboard()" class="text-slate-400 hover:text-white p-2 rounded-lg transition text-xs" title="Reload Live Data">
+                    <button onclick="resetDashboard()" class="text-slate-400 hover:text-white p-2 rounded-lg transition text-xs" title="Force Sync Now">
                         <i class="fa-solid fa-rotate-right"></i>
                     </button>
                 </div>
@@ -575,7 +578,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         </button>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH LIVE CSV FETCH & CHATBOT -->
+    <!-- JAVASCRIPT LOGIC WITH INSTANT GOOGLE SHEETS GVIZ SYNC & CHATBOT -->
     <script>
         // Pre-configured HR Team Roster (All 21 Unique Agents)
         const DEFAULT_HR_AGENTS = [
@@ -602,6 +605,11 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             'Yuvaraju K'
         ];
 
+        // REPLACE 'YOUR_SHEET_ID' and 'Form%20Responses%201' with your Google Sheet ID & Tab Name
+        // Make sure Google Sheet Share setting is "Anyone with the link" -> Viewer
+        const LIVE_CSV_PATH = 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/gviz/tq?tqx=out:csv&sheet=Form%20Responses%201';
+        const AUTO_REFRESH_INTERVAL_MS = 15000; // Auto-sync every 15 seconds
+
         // Global State Management
         let rawData = [];
         let filteredData = [];
@@ -609,7 +617,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         let callChartInstance = null;
         let weeklyChartInstance = null;
         let monthlyOutputChart = null;
-        const LIVE_CSV_PATH = 'https://docs.google.com/spreadsheets/d/1D5w6DDqOr4tbqvsdN1_U1VKuK5liiWhsq862mdlpaUw/edit?gid=1336393646#gid=1336393646';
 
         // Validation & Parsing Utilities
         function parseNumeric(val) {
@@ -631,12 +638,16 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             return '';
         }
 
+        // Handles DD/MM/YYYY (e.g. 18/11/2026) and YYYY-MM-DD timestamps
         function formatDate(timestampStr) {
             if (!timestampStr) return 'Unknown';
-            const rawDate = timestampStr.trim().split(' ')[0];
-            if (/^\d{2}[\/-]\d{2}[\/-]\d{4}$/.test(rawDate)) {
+            const rawDate = String(timestampStr).trim().split(' ')[0];
+            if (/^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(rawDate)) {
                 const parts = rawDate.split(/[\/-]/);
-                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                const day = parts[0].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                const year = parts[2];
+                return `${year}-${month}-${day}`;
             }
             return rawDate;
         }
@@ -647,6 +658,9 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             renderMonthlyView();
             setupEventListeners();
             initLiveCSVData();
+
+            // Automatically poll Google Sheets every 15 seconds for immediate updates
+            setInterval(() => initLiveCSVData(true), AUTO_REFRESH_INTERVAL_MS);
         });
 
         function setupEventListeners() {
@@ -666,18 +680,21 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
         }
 
-        async function initLiveCSVData() {
+        async function initLiveCSVData(silent = false) {
             const badge = document.getElementById('activeFiltersBadge');
-            badge.innerText = 'Syncing live CSV data...';
+            if (!silent) {
+                badge.innerText = 'Syncing live Google Sheet...';
+            }
 
             try {
-                const response = await fetch(`${LIVE_CSV_PATH}?t=${new Date().getTime()}`);
+                const separator = LIVE_CSV_PATH.includes('?') ? '&' : '?';
+                const response = await fetch(`${LIVE_CSV_PATH}${separator}t=${new Date().getTime()}`, { cache: 'no-store' });
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status} — Could not load ${LIVE_CSV_PATH}`);
+                    throw new Error(`HTTP ${response.status} — Could not fetch Google Sheet CSV`);
                 }
                 const csvText = await response.text();
-                if (!csvText || !csvText.trim()) {
-                    throw new Error(`${LIVE_CSV_PATH} is empty`);
+                if (!csvText || !csvText.trim() || csvText.trim().startsWith('<!DOCTYPE html')) {
+                    throw new Error('Sheet is restricted or invalid URL. Set Share access to "Anyone with the link".');
                 }
                 processCSVData(csvText);
             } catch (e) {
@@ -724,7 +741,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                     applyFilters();
                 },
                 error: function(err) {
-                    alert('Error parsing CSV file: ' + err.message);
+                    console.error('Error parsing CSV:', err.message);
                 }
             });
         }
@@ -777,7 +794,10 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 badges.push(`Until: ${endDate}`);
             }
             if (selectedAgent !== 'all') badges.push(`Agent: ${selectedAgent}`);
-            document.getElementById('activeFiltersBadge').innerText = badges.length > 0 ? `Filtering by [ ${badges.join(' | ')} ]` : `Showing live dataset (${rawData.length} records)`;
+            const syncTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('activeFiltersBadge').innerText = badges.length > 0
+                ? `Filtering by [ ${badges.join(' | ')} ] • Synced ${syncTime}`
+                : `Showing live dataset (${rawData.length} records) • Synced ${syncTime}`;
 
             refreshDashboardUI();
         }
@@ -793,7 +813,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             document.getElementById('agentFilter').value = 'all';
-            initLiveCSVData();
+            initLiveCSVData(false);
         }
 
         function switchTab(tabId) {
@@ -1270,7 +1290,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
 
             if (!filteredData || filteredData.length === 0) {
-                return "No records match the current filters (or CSV data hasn't loaded yet). Try clearing your filters or importing a CSV.";
+                return "No records match the current filters (or Google Sheet hasn't synced yet). Try clearing filters or verifying your Google Sheet sharing settings.";
             }
 
             // Other Works query
