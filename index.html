@@ -578,7 +578,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
         </button>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH INSTANT GOOGLE SHEETS GVIZ SYNC & CHATBOT -->
+    <!-- JAVASCRIPT LOGIC WITH PUBLISHED GOOGLE SHEET CSV SYNC & CHATBOT -->
     <script>
         // Pre-configured HR Team Roster (All 21 Unique Agents)
         const DEFAULT_HR_AGENTS = [
@@ -605,10 +605,10 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             'Yuvaraju K'
         ];
 
-        // REPLACE 'YOUR_SHEET_ID' and 'Form%20Responses%201' with your Google Sheet ID & Tab Name
-        // Make sure Google Sheet Share setting is "Anyone with the link" -> Viewer
-        const LIVE_CSV_PATH = 'https://docs.google.com/spreadsheets/d/1D5w6DDqOr4tbqvsdN1_U1VKuK5liiWhsq862mdlpaUw/edit?gid=1336393646#gid=1336393646/gviz/tq?tqx=out:csv&sheet=Form%20Responses%201';
-        const AUTO_REFRESH_INTERVAL_MS = 15000; // Auto-sync every 15 seconds
+        // Live Published Google Sheets CSV Link
+        const LIVE_CSV_PATH = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhJy2W1pB6b7z6gHgf6Lu5S6Ri0T1MuRAPLP5yo5FSjJWmfNGZBab-xUsyNzrbq7jWORyTLzH8GJdB/pub?gid=1336393646&single=true&output=csv';
+        const FALLBACK_CSV_PATH = 'data/ops_data.csv';
+        const AUTO_REFRESH_INTERVAL_MS = 15000;
 
         // Global State Management
         let rawData = [];
@@ -659,7 +659,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             setupEventListeners();
             initLiveCSVData();
 
-            // Automatically poll Google Sheets every 15 seconds for immediate updates
             setInterval(() => initLiveCSVData(true), AUTO_REFRESH_INTERVAL_MS);
         });
 
@@ -680,6 +679,23 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
         }
 
+        async function fetchCsvFromUrl(url) {
+            const separator = url.includes('?') ? '&' : '?';
+            const response = await fetch(`${url}${separator}t=${new Date().getTime()}`, {
+                method: 'GET',
+                redirect: 'follow',
+                cache: 'no-store'
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status} — Could not fetch CSV`);
+            }
+            const csvText = await response.text();
+            if (!csvText || !csvText.trim() || csvText.trim().startsWith('<!DOCTYPE html')) {
+                throw new Error('Invalid CSV response');
+            }
+            return csvText;
+        }
+
         async function initLiveCSVData(silent = false) {
             const badge = document.getElementById('activeFiltersBadge');
             if (!silent) {
@@ -687,19 +703,16 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
 
             try {
-                const separator = LIVE_CSV_PATH.includes('?') ? '&' : '?';
-                const response = await fetch(`${LIVE_CSV_PATH}${separator}t=${new Date().getTime()}`, { cache: 'no-store' });
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status} — Could not fetch Google Sheet CSV`);
-                }
-                const csvText = await response.text();
-                if (!csvText || !csvText.trim() || csvText.trim().startsWith('<!DOCTYPE html')) {
-                    throw new Error('Sheet is restricted or invalid URL. Set Share access to "Anyone with the link".');
-                }
+                const csvText = await fetchCsvFromUrl(LIVE_CSV_PATH);
                 processCSVData(csvText);
-            } catch (e) {
-                console.error("Live CSV Sync Error:", e);
-                badge.innerHTML = `<span class="text-rose-600 font-semibold">⚠️ Sync Error: ${escapeHtml(e.message)}</span>`;
+            } catch (primaryErr) {
+                console.warn('Primary live sync issue:', primaryErr.message);
+                try {
+                    const fallbackCsv = await fetchCsvFromUrl(FALLBACK_CSV_PATH);
+                    processCSVData(fallbackCsv);
+                } catch (fallbackErr) {
+                    badge.innerHTML = `<span class="text-rose-600 font-semibold">⚠️ Sync Error: ${escapeHtml(primaryErr.message)}</span>`;
+                }
             }
         }
 
@@ -1290,7 +1303,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
 
             if (!filteredData || filteredData.length === 0) {
-                return "No records match the current filters (or Google Sheet hasn't synced yet). Try clearing filters or verifying your Google Sheet sharing settings.";
+                return "No records match the current filters (or Google Sheet hasn't synced yet). Try clearing filters or checking your published CSV link.";
             }
 
             // Other Works query
