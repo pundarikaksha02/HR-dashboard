@@ -30,7 +30,7 @@
         /* Clean Print / PDF View */
         @media print {
             body { background-color: #ffffff; }
-            header, #hrChatbotContainer, .no-print { display: none !important; }
+            header, #hrChatbotContainer, #pinLockOverlay, .no-print { display: none !important; }
             .table-scroll-wrap { max-height: none !important; overflow: visible !important; }
             .sticky-col { position: static !important; box-shadow: none !important; }
             .stat-card, .bg-white { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
@@ -38,6 +38,27 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+
+    <!-- 4-DIGIT PIN PASSCODE LOCK OVERLAY -->
+    <div id="pinLockOverlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-center space-y-5">
+            <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-md">
+                <i class="fa-solid fa-lock text-lg"></i>
+            </div>
+            <div>
+                <h2 class="text-base font-bold text-slate-900">Canwin HR Operations</h2>
+                <p class="text-xs text-slate-500 mt-1">Enter your 4-digit team PIN to access the live dashboard</p>
+            </div>
+            <form onsubmit="verifyPinSubmit(event)" class="space-y-4">
+                <input type="password" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="••••" autocomplete="off"
+                    class="w-40 mx-auto block text-center text-2xl tracking-[0.5em] font-bold border border-slate-300 rounded-xl py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <p id="pinErrorMsg" class="hidden text-xs text-rose-600 font-semibold">Incorrect PIN. Please try again.</p>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2.5 rounded-xl transition shadow-sm">
+                    Unlock Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- Navigation Header -->
     <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
@@ -52,7 +73,7 @@
                         <p class="text-xs text-slate-400">HR Operations Dashboard</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2.5">
                     <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-emerald-400 bg-slate-800 px-3 py-1 rounded-full font-medium">
                         <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live Auto-Sync (15s)
                     </span>
@@ -63,6 +84,9 @@
                     </label>
                     <button onclick="resetDashboard()" class="text-slate-400 hover:text-white p-2 rounded-lg transition text-xs" title="Force Sync Now">
                         <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                    <button onclick="lockDashboard()" class="text-slate-400 hover:text-amber-400 p-2 rounded-lg transition text-xs" title="Lock Dashboard">
+                        <i class="fa-solid fa-lock"></i>
                     </button>
                 </div>
             </div>
@@ -155,7 +179,7 @@
                             <span class="text-xs font-bold text-slate-800">Reporting Coverage:</span>
                             <span id="coverageLoggedText" class="text-xs font-bold text-emerald-600">0 / 21 Agents Logged</span>
                             <span id="coveragePendingBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">21 Pending</span>
-                            <span id="duplicateAlertBadge" class="hidden text-[11px] font-semibold px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border border-orange-200">0 Duplicate Logs</span>
+                            <button onclick="toggleDuplicateOnlyFilter()" id="duplicateAlertBadge" class="hidden text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 transition cursor-pointer" title="Click to filter only duplicate rows">0 Duplicate Logs</button>
                         </div>
                         <p class="text-[11px] text-slate-400 mt-0.5">Agents without a log entry in the currently selected date range</p>
                     </div>
@@ -384,7 +408,7 @@
                 </div>
             </div>
 
-            <!-- Team Scorecard Table with Sticky First Column & Grand Total Footer -->
+            <!-- Team Scorecard Table / Mobile Cards -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2 bg-slate-50/50">
                     <div>
@@ -392,9 +416,17 @@
                             <i class="fa-solid fa-users mr-2 text-blue-600"></i>
                             <span>Daily Team Scorecard</span>
                         </h3>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Scroll horizontally to view all metrics &bull; Click any <strong>Other Works</strong> note to read in full</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Click any <strong>HR Agent</strong> name for their full profile &bull; Click any <strong>Other Works</strong> note to expand</p>
                     </div>
                     <div class="flex items-center gap-2 no-print">
+                        <div class="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+                            <button onclick="setDailyDisplayMode('table')" id="btnModeTable" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-600 text-white transition">
+                                <i class="fa-solid fa-table mr-1"></i>Table
+                            </button>
+                            <button onclick="setDailyDisplayMode('cards')" id="btnModeCards" class="px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+                                <i class="fa-solid fa-grip mr-1"></i>Cards
+                            </button>
+                        </div>
                         <button onclick="window.print()" class="text-xs text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition font-medium shadow-sm">
                             <i class="fa-solid fa-print mr-1"></i> Print / PDF
                         </button>
@@ -403,7 +435,9 @@
                         </button>
                     </div>
                 </div>
-                <div class="table-scroll-wrap">
+
+                <!-- Table View -->
+                <div id="dailyTableContainer" class="table-scroll-wrap">
                     <table id="dailyScorecardTable" class="min-w-full divide-y divide-slate-200 text-xs">
                         <thead class="text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
@@ -433,12 +467,14 @@
                         <tfoot id="table-daily-foot" class="text-slate-800 font-bold text-xs"></tfoot>
                     </table>
                 </div>
+
+                <!-- Compact Card View (Great for Mobile) -->
+                <div id="dailyCardsContainer" class="hidden p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-50/40"></div>
             </div>
         </div>
 
         <!-- TAB CONTENT: WEEKLY -->
         <div id="content-weekly" class="tab-content space-y-6">
-            <!-- Trend Analysis Section -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div class="border-b border-slate-100 pb-3 mb-4">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center">
@@ -533,6 +569,23 @@
         </div>
 
     </main>
+
+    <!-- INDIVIDUAL AGENT DEEP-DIVE DRAWER -->
+    <div id="agentDrawerOverlay" class="fixed inset-0 bg-slate-900/50 hidden z-50 flex justify-end" onclick="if(event.target===this) closeAgentDrawer()">
+        <div class="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col overflow-hidden">
+            <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm" id="drawerAgentInitials">HR</div>
+                    <div>
+                        <h3 id="drawerAgentName" class="text-base font-bold">Agent Name</h3>
+                        <p id="drawerAgentSubtitle" class="text-xs text-slate-400">Performance Deep-Dive</p>
+                    </div>
+                </div>
+                <button onclick="closeAgentDrawer()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            <div id="drawerBody" class="flex-1 overflow-y-auto p-5 space-y-5 text-xs"></div>
+        </div>
+    </div>
 
     <!-- OTHER WORKS FULL NOTE MODAL -->
     <div id="noteModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden flex items-center justify-center p-4 z-50" onclick="if(event.target===this) closeNoteModal()">
@@ -642,9 +695,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
 
     <!-- FLOATING HR OPS CHATBOT WIDGET -->
     <div id="hrChatbotContainer" class="fixed bottom-5 right-5 z-50 flex flex-col items-end">
-        <!-- Chat Window -->
         <div id="hrChatWindow" class="hidden mb-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <!-- Chat Header -->
             <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center space-x-2.5">
                     <div class="bg-blue-600 p-1.5 rounded-lg">
@@ -662,7 +713,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 </button>
             </div>
 
-            <!-- Messages Feed -->
             <div id="chatMessages" class="p-3.5 h-72 overflow-y-auto space-y-3 bg-slate-50 text-xs">
                 <div class="flex items-start space-x-2">
                     <div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px]">
@@ -674,7 +724,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 </div>
             </div>
 
-            <!-- Quick Suggestion Chips -->
             <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto">
                 <button onclick="sendQuickPrompt('Full summary')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Full Summary</button>
                 <button onclick="sendQuickPrompt('Pending agents')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Pending Agents</button>
@@ -683,7 +732,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 <button onclick="sendQuickPrompt('Top HR agent')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Top Agent</button>
             </div>
 
-            <!-- Input Area -->
             <form onsubmit="handleChatSubmit(event)" class="p-2.5 bg-white border-t border-slate-200 flex items-center space-x-2">
                 <input type="text" id="chatInput" placeholder="Ask about metrics or an agent..." autocomplete="off" class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition">
@@ -692,15 +740,49 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             </form>
         </div>
 
-        <!-- Floating Launcher Button -->
         <button onclick="toggleChatbot()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-3 shadow-lg flex items-center space-x-2 transition transform hover:scale-105">
             <i class="fa-solid fa-comment-dots text-base"></i>
             <span class="text-xs font-bold">Ask HR Bot</span>
         </button>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH LEADERBOARD, GRAND TOTALS, DUPLICATE DETECTION & LIVE SYNC -->
+    <!-- JAVASCRIPT LOGIC WITH PIN LOCK, AGENT DRAWER, CARD VIEW, LEADERBOARD & LIVE SYNC -->
     <script>
+        // ================= ACCESS PIN CONFIGURATION =================
+        const DASHBOARD_PIN = '2027'; // Change this 4-digit PIN anytime
+        const PIN_SESSION_KEY = 'canwin_hr_unlocked_v1';
+
+        function checkPinLockState() {
+            const overlay = document.getElementById('pinLockOverlay');
+            if (sessionStorage.getItem(PIN_SESSION_KEY) === 'true') {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
+                setTimeout(() => document.getElementById('pinInput').focus(), 100);
+            }
+        }
+
+        function verifyPinSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('pinInput');
+            const errMsg = document.getElementById('pinErrorMsg');
+            if (input.value.trim() === DASHBOARD_PIN) {
+                sessionStorage.setItem(PIN_SESSION_KEY, 'true');
+                errMsg.classList.add('hidden');
+                input.value = '';
+                document.getElementById('pinLockOverlay').classList.add('hidden');
+            } else {
+                errMsg.classList.remove('hidden');
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function lockDashboard() {
+            sessionStorage.removeItem(PIN_SESSION_KEY);
+            checkPinLockState();
+        }
+
         // Pre-configured HR Team Roster (All 21 Unique Agents)
         const DEFAULT_HR_AGENTS = [
             'Balaji K',
@@ -741,6 +823,8 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
         let weeklyChartInstance = null;
         let monthlyOutputChart = null;
         let missingListExpanded = false;
+        let onlyDuplicatesFilter = false;
+        let dailyDisplayMode = 'table';
 
         // Validation & Parsing Utilities
         function parseNumeric(val) {
@@ -784,6 +868,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
 
         // Core App Initialization
         document.addEventListener('DOMContentLoaded', () => {
+            checkPinLockState();
             populateFilterDropdowns();
             updateMissingAgentsTracker();
             renderMonthlyView();
@@ -978,6 +1063,11 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             applyFilters();
         }
 
+        function toggleDuplicateOnlyFilter() {
+            onlyDuplicatesFilter = !onlyDuplicatesFilter;
+            applyFilters();
+        }
+
         function applyFilters() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
@@ -989,7 +1079,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 clearSearchBtn.classList.toggle('hidden', !searchTerm);
             }
 
-            filteredData = rawData.filter(item => {
+            let baseFiltered = rawData.filter(item => {
                 const matchStart = !startDate || (item.date !== 'Unknown' && item.date >= startDate);
                 const matchEnd = !endDate || (item.date !== 'Unknown' && item.date <= endDate);
                 const matchAgent = (selectedAgent === 'all' || item.agent.toLowerCase() === selectedAgent.toLowerCase());
@@ -998,6 +1088,34 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                     (item.otherWorks && item.otherWorks.toLowerCase().includes(searchTerm));
                 return matchStart && matchEnd && matchAgent && matchSearch;
             });
+
+            const pairCounts = {};
+            baseFiltered.forEach(r => {
+                const key = `${r.agent.toLowerCase()}__${r.date}`;
+                pairCounts[key] = (pairCounts[key] || 0) + 1;
+            });
+
+            const totalDuplicateRows = baseFiltered.filter(r => pairCounts[`${r.agent.toLowerCase()}__${r.date}`] > 1).length;
+            if (totalDuplicateRows === 0) onlyDuplicatesFilter = false;
+
+            const dupBadge = document.getElementById('duplicateAlertBadge');
+            if (dupBadge) {
+                if (totalDuplicateRows > 0) {
+                    dupBadge.classList.remove('hidden');
+                    dupBadge.innerText = onlyDuplicatesFilter
+                        ? `Showing ${totalDuplicateRows} Duplicates (Click to Show All)`
+                        : `${totalDuplicateRows} Duplicate Logs`;
+                    dupBadge.className = onlyDuplicatesFilter
+                        ? 'text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-orange-600 text-white border border-orange-700 transition cursor-pointer'
+                        : 'text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 transition cursor-pointer';
+                } else {
+                    dupBadge.classList.add('hidden');
+                }
+            }
+
+            filteredData = onlyDuplicatesFilter
+                ? baseFiltered.filter(r => pairCounts[`${r.agent.toLowerCase()}__${r.date}`] > 1)
+                : baseFiltered;
 
             const badges = [];
             if (startDate && endDate) {
@@ -1009,6 +1127,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             }
             if (selectedAgent !== 'all') badges.push(`Agent: ${selectedAgent}`);
             if (searchTerm) badges.push(`Search: "${searchTerm}"`);
+            if (onlyDuplicatesFilter) badges.push('Duplicates Only');
 
             const syncTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             document.getElementById('activeFiltersBadge').innerText = badges.length > 0
@@ -1100,6 +1219,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             document.getElementById('endDate').value = '';
             document.getElementById('agentFilter').value = 'all';
             document.getElementById('quickSearchInput').value = '';
+            onlyDuplicatesFilter = false;
             const allBtn = document.querySelectorAll('.preset-btn')[4];
             highlightPresetButton(allBtn);
             applyFilters();
@@ -1108,6 +1228,26 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
         function resetDashboard() {
             clearFilters();
             initLiveCSVData(false);
+        }
+
+        function setDailyDisplayMode(mode) {
+            dailyDisplayMode = mode;
+            const tableWrap = document.getElementById('dailyTableContainer');
+            const cardsWrap = document.getElementById('dailyCardsContainer');
+            const btnTable = document.getElementById('btnModeTable');
+            const btnCards = document.getElementById('btnModeCards');
+
+            if (mode === 'cards') {
+                tableWrap.classList.add('hidden');
+                cardsWrap.classList.remove('hidden');
+                btnCards.className = 'px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-600 text-white transition';
+                btnTable.className = 'px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+            } else {
+                cardsWrap.classList.add('hidden');
+                tableWrap.classList.remove('hidden');
+                btnTable.className = 'px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-600 text-white transition';
+                btnCards.className = 'px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+            }
         }
 
         function switchTab(tabId) {
@@ -1152,6 +1292,92 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
 
         function closeNoteModal() {
             document.getElementById('noteModal').classList.add('hidden');
+        }
+
+        // ================= INDIVIDUAL AGENT DEEP-DIVE DRAWER =================
+        function openAgentDrawer(agentName) {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const agentRows = rawData.filter(item => {
+                const matchAgent = item.agent.toLowerCase() === agentName.toLowerCase();
+                const matchStart = !startDate || (item.date !== 'Unknown' && item.date >= startDate);
+                const matchEnd = !endDate || (item.date !== 'Unknown' && item.date <= endDate);
+                return matchAgent && matchStart && matchEnd;
+            });
+
+            const initials = agentName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+            document.getElementById('drawerAgentInitials').innerText = initials || 'HR';
+            document.getElementById('drawerAgentName').innerText = agentName;
+            document.getElementById('drawerAgentSubtitle').innerText = `${agentRows.length} submission(s) in selected date range`;
+
+            const body = document.getElementById('drawerBody');
+            if (agentRows.length === 0) {
+                body.innerHTML = `<div class="p-6 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200">No submissions logged by <strong>${escapeHtml(agentName)}</strong> in this date range.</div>`;
+                document.getElementById('agentDrawerOverlay').classList.remove('hidden');
+                return;
+            }
+
+            const sum = agentRows.reduce((a, r) => {
+                a.olA += r.olAssigned; a.olR += r.olReleased; a.promo += r.promoReleased;
+                a.rev += r.revisedOlReleased; a.offA += r.offboardAssigned; a.offI += r.offboardIssued;
+                a.callsA += r.callsAssigned; a.callsC += r.connectedCalls; a.docs += r.docsReceived;
+                a.wa += r.whatsappCleared; a.mails += r.mails; a.sel += r.selectionsAllClients;
+                a.olAll += r.olAllClients;
+                return a;
+            }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, callsA: 0, callsC: 0, docs: 0, wa: 0, mails: 0, sel: 0, olAll: 0 });
+
+            const olRate = sum.olA > 0 ? Math.round((sum.olR / sum.olA) * 100) : 0;
+            const callRate = sum.callsA > 0 ? Math.round((sum.callsC / sum.callsA) * 100) : 0;
+
+            const logsHtml = agentRows.slice().reverse().map(r => `
+                <div class="p-3 rounded-xl border border-slate-200 bg-slate-50/60 space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-800">${escapeHtml(r.date)}</span>
+                        <span class="text-[10px] text-slate-400">${escapeHtml(r.timestamp)}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-[11px] text-slate-600">
+                        <div>OL: <strong class="text-blue-600">${r.olReleased}</strong>/${r.olAssigned}</div>
+                        <div>Calls: <strong class="text-emerald-600">${r.connectedCalls}</strong>/${r.callsAssigned}</div>
+                        <div>Docs: <strong class="text-amber-600">${r.docsReceived}</strong></div>
+                        <div>WA: <strong class="text-purple-600">${r.whatsappCleared}</strong></div>
+                        <div>Mails: <strong>${r.mails}</strong></div>
+                        <div>Selections: <strong class="text-teal-600">${r.selectionsAllClients}</strong></div>
+                    </div>
+                    ${r.otherWorks ? `<div class="text-[11px] text-slate-700 bg-white p-2 rounded border border-slate-200 mt-1"><strong>Other Works:</strong> ${escapeHtml(r.otherWorks)}</div>` : ''}
+                </div>
+            `).join('');
+
+            body.innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 rounded-xl border border-slate-200 bg-blue-50/40">
+                        <p class="text-[10px] font-bold uppercase text-slate-400">Offer Letters Released</p>
+                        <p class="text-lg font-bold text-blue-700 mt-0.5">${sum.olR} <span class="text-xs font-normal text-slate-500">/ ${sum.olA} (${olRate}%)</span></p>
+                    </div>
+                    <div class="p-3 rounded-xl border border-slate-200 bg-emerald-50/40">
+                        <p class="text-[10px] font-bold uppercase text-slate-400">Connected Calls</p>
+                        <p class="text-lg font-bold text-emerald-700 mt-0.5">${sum.callsC} <span class="text-xs font-normal text-slate-500">/ ${sum.callsA} (${callRate}%)</span></p>
+                    </div>
+                    <div class="p-3 rounded-xl border border-slate-200 bg-amber-50/40">
+                        <p class="text-[10px] font-bold uppercase text-slate-400">Docs &amp; Chats</p>
+                        <p class="text-sm font-bold text-slate-800 mt-0.5">${sum.docs} Docs &bull; ${sum.wa} WA &bull; ${sum.mails} Mails</p>
+                    </div>
+                    <div class="p-3 rounded-xl border border-slate-200 bg-teal-50/40">
+                        <p class="text-[10px] font-bold uppercase text-slate-400">All Clients &amp; Letters</p>
+                        <p class="text-sm font-bold text-slate-800 mt-0.5">${sum.sel} Sel &bull; ${sum.promo} Promo &bull; ${sum.offI} Offboard</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Submission History</h4>
+                    <div class="space-y-2.5">${logsHtml}</div>
+                </div>
+            `;
+
+            document.getElementById('agentDrawerOverlay').classList.remove('hidden');
+        }
+
+        function closeAgentDrawer() {
+            document.getElementById('agentDrawerOverlay').classList.add('hidden');
         }
 
         // Main Dashboard UI Refresh Orchestrator
@@ -1224,20 +1450,20 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             document.getElementById('stat-other-works-count').innerText = otherWorksCount.toLocaleString();
         }
 
-        // Render Daily View (with Duplicate Flagging, Grand Total Footer, and Top 5 Leaderboard)
+        // Render Daily View
         function renderDailyView() {
             const tbody = document.getElementById('table-daily-body');
             const tfoot = document.getElementById('table-daily-foot');
+            const cardsContainer = document.getElementById('dailyCardsContainer');
             tbody.innerHTML = '';
+            cardsContainer.innerHTML = '';
 
-            // Count occurrences of (agent + date) to detect potential duplicate submissions
             const pairCounts = {};
             filteredData.forEach(r => {
                 const key = `${r.agent.toLowerCase()}__${r.date}`;
                 pairCounts[key] = (pairCounts[key] || 0) + 1;
             });
 
-            let duplicateRowsCount = 0;
             const grand = {
                 olAssigned: 0, olReleased: 0, promo: 0, revisedOl: 0,
                 offAssign: 0, offIssue: 0, callsAssigned: 0, connected: 0,
@@ -1248,7 +1474,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             filteredData.forEach(row => {
                 const key = `${row.agent.toLowerCase()}__${row.date}`;
                 const isDup = pairCounts[key] > 1;
-                if (isDup) duplicateRowsCount++;
 
                 grand.olAssigned += row.olAssigned;
                 grand.olReleased += row.olReleased;
@@ -1281,7 +1506,9 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                     : `<span class="text-slate-400">-</span>`;
 
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap sticky-col">${escapeHtml(row.agent)}${dupTag}</td>
+                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap sticky-col">
+                        <button onclick="openAgentDrawer(${JSON.stringify(row.agent)})" class="hover:text-blue-600 hover:underline text-left font-semibold">${escapeHtml(row.agent)}</button>${dupTag}
+                    </td>
                     <td class="px-3 py-3 text-center text-slate-500 whitespace-nowrap">${escapeHtml(row.date)}</td>
                     <td class="px-3 py-3 text-center text-slate-600">${row.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
@@ -1303,20 +1530,27 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                     <td class="px-3 py-3 text-left">${otherWorkCell}</td>
                 `;
                 tbody.appendChild(tr);
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border ${isDup ? 'border-orange-300 bg-amber-50/40' : 'border-slate-200 bg-white'} shadow-sm space-y-2.5 text-xs`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <button onclick="openAgentDrawer(${JSON.stringify(row.agent)})" class="font-bold text-slate-900 hover:text-blue-600 text-left text-sm">${escapeHtml(row.agent)}${dupTag}</button>
+                        <span class="text-[11px] text-slate-400 font-medium">${escapeHtml(row.date)}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-[11px]">
+                        <div class="bg-slate-50 p-2 rounded-lg"><span class="text-slate-400 block text-[9px] uppercase">OL Rel/Asg</span><strong class="text-blue-600">${row.olReleased}</strong> / ${row.olAssigned}</div>
+                        <div class="bg-slate-50 p-2 rounded-lg"><span class="text-slate-400 block text-[9px] uppercase">Calls Conn</span><strong class="text-emerald-600">${row.connectedCalls}</strong> / ${row.callsAssigned}</div>
+                        <div class="bg-slate-50 p-2 rounded-lg"><span class="text-slate-400 block text-[9px] uppercase">Docs / WA</span><strong class="text-amber-600">${row.docsReceived}</strong> / <strong class="text-purple-600">${row.whatsappCleared}</strong></div>
+                        <div class="bg-slate-50 p-2 rounded-lg"><span class="text-slate-400 block text-[9px] uppercase">Promo / Rev</span><strong class="text-indigo-600">${row.promoReleased}</strong> / <strong class="text-cyan-600">${row.revisedOlReleased}</strong></div>
+                        <div class="bg-slate-50 p-2 rounded-lg"><span class="text-slate-400 block text-[9px] uppercase">Offboard</span><strong class="text-rose-600">${row.offboardIssued}</strong> / ${row.offboardAssigned}</div>
+                        <div class="bg-slate-50 p-2 rounded-lg"><span class="text-slate-400 block text-[9px] uppercase">Sel / Mails</span><strong class="text-teal-600">${row.selectionsAllClients}</strong> / <strong>${row.mails}</strong></div>
+                    </div>
+                    ${row.otherWorks ? `<div class="text-[11px] text-slate-600 bg-lime-50/70 border border-lime-200 rounded-lg p-2"><strong>Other Works:</strong> ${escapeHtml(row.otherWorks)}</div>` : ''}
+                `;
+                cardsContainer.appendChild(card);
             });
 
-            // Update Duplicate Alert Badge in Coverage Card
-            const dupBadge = document.getElementById('duplicateAlertBadge');
-            if (dupBadge) {
-                if (duplicateRowsCount > 0) {
-                    dupBadge.classList.remove('hidden');
-                    dupBadge.innerText = `${duplicateRowsCount} Duplicate Logs`;
-                } else {
-                    dupBadge.classList.add('hidden');
-                }
-            }
-
-            // Render Grand Total Footer Row
             tfoot.innerHTML = `
                 <tr>
                     <td class="px-3 py-3 text-left sticky-col uppercase text-[11px] text-slate-900">Grand Total (${filteredData.length})</td>
@@ -1342,7 +1576,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 </tr>
             `;
 
-            // Charts
             if (lettersChartInstance) lettersChartInstance.destroy();
             if (callChartInstance) callChartInstance.destroy();
             if (topPerformersChartInstance) topPerformersChartInstance.destroy();
@@ -1372,7 +1605,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }, title: { display: true, text: 'Call Connection Ratio', font: { size: 11 } } } }
             });
 
-            // Top 5 Performers Horizontal Leaderboard
             const metricKey = document.getElementById('leaderboardMetric').value || 'olReleased';
             const metricLabels = {
                 olReleased: 'Offer Letters Released',
@@ -1413,7 +1645,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             });
         }
 
-        // Render Weekly View (with Grand Total Footer)
+        // Render Weekly View
         function renderWeeklyView() {
             const dailyMap = {};
             filteredData.forEach(row => {
@@ -1508,7 +1740,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             });
         }
 
-        // Render Monthly View (Includes all 21 pre-configured HR Agents + Grand Total Footer)
+        // Render Monthly View
         function renderMonthlyView() {
             const selectedAgent = document.getElementById('agentFilter').value;
             const agentSummary = {};
@@ -1562,7 +1794,9 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-bold text-slate-800 whitespace-nowrap sticky-col">${escapeHtml(agent)}</td>
+                    <td class="px-3 py-3 font-bold text-slate-800 whitespace-nowrap sticky-col">
+                        <button onclick="openAgentDrawer(${JSON.stringify(agent)})" class="hover:text-blue-600 hover:underline text-left font-bold">${escapeHtml(agent)}</button>
+                    </td>
                     <td class="px-3 py-3 text-center text-slate-600">${s.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-bold text-blue-600">${s.ol}</td>
                     <td class="px-3 py-3 text-center font-bold text-indigo-600">${s.promo}</td>
@@ -1741,7 +1975,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
         function generateBotResponse(query) {
             const q = query.toLowerCase();
 
-            // Check if query mentions any known HR Agent
             const allAgents = getAllKnownAgents();
             const matchedAgent = allAgents.find(a => q.includes(a.toLowerCase()));
             if (matchedAgent) {
@@ -1768,7 +2001,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 • Other Works: <strong>${worksText}</strong>`;
             }
 
-            // Pending / Missing agents query
             if (q.includes('pending') || q.includes('missing') || q.includes('not logged') || q.includes('absent')) {
                 if (currentMissingAgents.length === 0) {
                     return `All <strong>${allAgents.length}</strong> HR agents have logged entries in the current date range!`;
@@ -1784,7 +2016,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 return "No records match the current filters (or Google Sheet hasn't synced yet). Try clicking <strong>All Time</strong> or checking your published CSV link.";
             }
 
-            // Other Works query
             if (q.includes('other') || q.includes('work') || q.includes('task') || q.includes('note')) {
                 const works = filteredData.filter(r => r.otherWorks).map(r => `• <strong>${escapeHtml(r.agent)}</strong> (${escapeHtml(r.date)}): ${escapeHtml(r.otherWorks)}`);
                 if (works.length === 0) {
@@ -1793,7 +2024,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 return `<strong>Other Works Logged (${works.length}):</strong><br>${works.slice(0, 10).join('<br>')}${works.length > 10 ? `<br><em>...and ${works.length - 10} more</em>` : ''}`;
             }
 
-            // Aggregate current filtered data
             const totals = filteredData.reduce((acc, r) => {
                 acc.olAssigned += r.olAssigned;
                 acc.olReleased += r.olReleased;
@@ -1820,7 +2050,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 selAll: 0, olAll: 0, ovD: 0, ovSS: 0
             });
 
-            // Top / Best Agent
             if (q.includes('top') || q.includes('best') || q.includes('performer') || q.includes('highest')) {
                 const byAgent = {};
                 filteredData.forEach(r => {
@@ -1835,7 +2064,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 <strong>${escapeHtml(topName)}</strong> leads with <strong>${topStats.ol}</strong> offer letters released, <strong>${topStats.calls}</strong> connected calls, and <strong>${topStats.docs}</strong> documents processed.`;
             }
 
-            // Client Selections
             if (q.includes('selection') || q.includes('client') || q.includes('overall')) {
                 return `<strong>All Clients Selections Summary:</strong><br>
                 • Selections Received From All Clients: <strong>${totals.selAll.toLocaleString()}</strong><br>
@@ -1844,14 +2072,12 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 • Overall Selections (All Client) [ss]: <strong>${totals.ovSS.toLocaleString()}</strong>`;
             }
 
-            // Off-boarding
             if (q.includes('off') || q.includes('exit') || q.includes('boarding')) {
                 return `<strong>Off-boarding Summary:</strong><br>
                 • Off-boarding Letter Assigned: <strong>${totals.offAssign.toLocaleString()}</strong><br>
                 • Off-boarding Letter Issued: <strong>${totals.offIssue.toLocaleString()}</strong>`;
             }
 
-            // Offer / Promotion / Revised Letters
             if (q.includes('offer') || q.includes('promo') || q.includes('revised') || q.includes('letter') || q.includes('ol')) {
                 return `<strong>Letters Breakdown (${filteredData.length} records):</strong><br>
                 • Offer Letter Assigned: <strong>${totals.olAssigned.toLocaleString()}</strong><br>
@@ -1861,7 +2087,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 • OL Released from All Clients: <strong>${totals.olAll.toLocaleString()}</strong>`;
             }
 
-            // Calls
             if (q.includes('call') || q.includes('connect')) {
                 const rate = totals.callsAssigned > 0 ? Math.round((totals.connected / totals.callsAssigned) * 100) : 0;
                 return `<strong>Call Performance:</strong><br>
@@ -1870,7 +2095,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 • Not Connected: <strong>${totals.notConnected.toLocaleString()}</strong>`;
             }
 
-            // Docs, WhatsApp & Mails
             if (q.includes('doc') || q.includes('whatsapp') || q.includes('wa') || q.includes('chat') || q.includes('mail')) {
                 return `<strong>Docs, WhatsApp & Mails:</strong><br>
                 • Documents Received: <strong>${totals.docs.toLocaleString()}</strong><br>
@@ -1878,7 +2102,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 • Mails: <strong>${totals.mails.toLocaleString()}</strong>`;
             }
 
-            // Default Full Summary
             return `<strong>Current View Summary (${filteredData.length} records):</strong><br>
             • Offer Letters: <strong>${totals.olReleased}</strong> released / ${totals.olAssigned} assigned<br>
             • Promo: <strong>${totals.promo}</strong> | Revised OL: <strong>${totals.revisedOl}</strong><br>
