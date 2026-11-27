@@ -17,6 +17,17 @@
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         #chatMessages::-webkit-scrollbar { width: 5px; }
         #chatMessages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        /* Sticky First Column & Sticky Table Header */
+        .table-scroll-wrap { max-height: 520px; overflow: auto; }
+        .sticky-table thead th { position: sticky; top: 0; z-index: 20; background-color: #f8fafc; box-shadow: inset 0 -1px 0 #e2e8f0; }
+        .sticky-table th.sticky-col,
+        .sticky-table td.sticky-col { position: sticky; left: 0; z-index: 10; }
+        .sticky-table thead th.sticky-col { z-index: 30; background-color: #f8fafc; }
+        .sticky-table tbody td.sticky-col { background-color: #ffffff; box-shadow: 2px 0 5px -2px rgba(15, 23, 42, 0.08); }
+        .sticky-table tbody tr:hover td.sticky-col { background-color: #f8fafc; }
+        .sortable-th { cursor: pointer; user-select: none; transition: color 0.15s; }
+        .sortable-th:hover { color: #2563eb; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -34,7 +45,7 @@
                         <p class="text-xs text-slate-400">HR Operations Dashboard</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2.5">
                     <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-emerald-400 bg-slate-800 px-2.5 py-1 rounded-full">
                         <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live Auto-Sync (15s)
                     </span>
@@ -43,7 +54,7 @@
                         <span>Import CSV</span>
                         <input type="file" id="csvFileInput" accept=".csv" class="hidden">
                     </label>
-                    <button onclick="resetDashboard()" class="text-slate-400 hover:text-white p-2 rounded-lg transition text-xs" title="Force Sync Now">
+                    <button onclick="resetDashboard()" class="text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition text-xs" title="Force Sync Now">
                         <i class="fa-solid fa-rotate-right"></i>
                     </button>
                 </div>
@@ -52,11 +63,11 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
 
         <!-- Navigation Tabs -->
         <div class="border-b border-slate-200">
-            <nav class="flex space-x-8 overflow-x-auto" aria-label="Tabs">
+            <nav class="flex space-x-6 overflow-x-auto" aria-label="Tabs">
                 <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn border-blue-600 text-blue-600 whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-xs flex items-center space-x-2 transition">
                     <i class="fa-solid fa-calendar-day"></i>
                     <span>Daily Operations</span>
@@ -69,47 +80,96 @@
                     <i class="fa-solid fa-calendar-days"></i>
                     <span>Monthly Summaries</span>
                 </button>
-                <button onclick="toggleModal(true)" class="ml-auto self-center bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center space-x-1.5">
+                <button onclick="toggleModal(true)" class="ml-auto self-center bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center space-x-1.5 shadow-sm">
                     <i class="fa-solid fa-file-invoice"></i>
                     <span>Automated Templates</span>
                 </button>
             </nav>
         </div>
 
-        <!-- Filter Bar -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center space-x-4 flex-wrap gap-y-2">
+        <!-- Enhanced Filter Bar with Quick Date Presets -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <!-- Quick Date Presets -->
+                <div class="flex items-center flex-wrap gap-1.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Quick View:</span>
+                    <button onclick="setDatePreset('today', this)" id="preset-today" class="preset-btn text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition">Today</button>
+                    <button onclick="setDatePreset('yesterday', this)" id="preset-yesterday" class="preset-btn text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition">Yesterday</button>
+                    <button onclick="setDatePreset('week', this)" id="preset-week" class="preset-btn text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition">This Week</button>
+                    <button onclick="setDatePreset('month', this)" id="preset-month" class="preset-btn text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition">This Month</button>
+                    <button onclick="setDatePreset('all', this)" id="preset-all" class="preset-btn text-xs font-semibold px-2.5 py-1 rounded-lg border border-blue-600 bg-blue-600 text-white transition">All Time</button>
+                </div>
+
+                <!-- Live Sync Status & Clear -->
+                <div class="flex items-center space-x-3">
+                    <div id="activeFiltersBadge" class="text-xs text-slate-500 font-medium italic">Loading live data...</div>
+                    <button onclick="clearFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2.5 py-1 rounded-lg hover:bg-blue-50 transition">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-2.5 border-t border-slate-100 flex flex-wrap items-end gap-4">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Date Range</label>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Custom Date Range</label>
                     <div class="flex items-center space-x-2">
-                        <input type="date" id="startDate" onchange="applyFilters()" class="border border-slate-300 rounded-lg text-xs px-2.5 py-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                        <input type="date" id="startDate" onchange="onManualFilterChange()" class="border border-slate-300 rounded-lg text-xs px-2.5 py-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
                         <span class="text-xs text-slate-400">to</span>
-                        <input type="date" id="endDate" onchange="applyFilters()" class="border border-slate-300 rounded-lg text-xs px-2.5 py-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                        <input type="date" id="endDate" onchange="onManualFilterChange()" class="border border-slate-300 rounded-lg text-xs px-2.5 py-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
                     </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">HR Agent</label>
                     <select id="agentFilter" onchange="applyFilters()" class="border-slate-300 rounded-lg text-xs border py-1.5 px-2.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
-                        <option value="all">All Agents</option>
+                        <option value="all">All Agents (21)</option>
                     </select>
                 </div>
-            </div>
-            <div class="flex items-center space-x-3">
-                <div id="activeFiltersBadge" class="text-xs text-slate-500 font-medium italic">Loading live data...</div>
-                <button onclick="clearFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition">
-                    Clear Filters
-                </button>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Quick Search (Agent or Other Works)</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-2.5"></i>
+                        <input type="text" id="quickSearchInput" oninput="applyFilters()" placeholder="Type name or task keyword..." class="w-full border border-slate-300 rounded-lg text-xs pl-8 pr-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- KPI Summary Cards (Row 1: Core Operations) -->
+        <!-- Submission Coverage & Pending Agents Banner -->
+        <div id="submissionTrackerBanner" class="bg-white rounded-xl shadow-sm border border-slate-200 p-3.5 flex flex-col gap-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center space-x-2.5">
+                    <span id="submissionStatusIcon" class="bg-amber-100 text-amber-700 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold">
+                        <i class="fa-solid fa-user-clock"></i>
+                    </span>
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">
+                            Reporting Coverage: <span id="submittedCountBadge" class="text-emerald-600">0 / 21 Agents Logged</span>
+                            <span id="pendingCountBadge" class="ml-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">21 Pending</span>
+                        </p>
+                        <p class="text-[11px] text-slate-500">Agents without a log entry in the currently selected date range</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="copyPendingAgentsList(this)" id="copyPendingBtn" class="text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold px-2.5 py-1 rounded-lg transition flex items-center space-x-1">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copy Pending List</span>
+                    </button>
+                    <button onclick="togglePendingChips()" id="togglePendingBtn" class="text-[11px] text-slate-600 hover:text-blue-600 font-semibold px-2 py-1 rounded hover:bg-slate-100 transition">
+                        Show Names <i class="fa-solid fa-chevron-down ml-0.5"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="pendingAgentsChips" class="hidden pt-2 border-t border-slate-100 flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- KPI Summary Cards (Row 1: Core Operations with Conversion & Backlog Badges) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="stat-card bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-600">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Offer Letter Assigned</p>
                         <h3 id="stat-ol-assigned" class="text-xl font-bold text-slate-800 mt-1">0</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Total Assigned</p>
+                        <p class="text-xs text-slate-500 mt-0.5"><span id="stat-ol-pending" class="font-semibold text-amber-600">0</span> Pending Release</p>
                     </div>
                     <div class="bg-blue-50 p-2.5 rounded-lg">
                         <i class="fa-solid fa-file-signature text-blue-600 text-sm"></i>
@@ -121,7 +181,7 @@
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Offer Letter Released</p>
                         <h3 id="stat-ol-released" class="text-xl font-bold text-slate-800 mt-1">0</h3>
-                        <p class="text-xs text-slate-500 mt-0.5"><span class="font-bold text-sky-600">Released</span></p>
+                        <p class="text-xs text-slate-500 mt-0.5"><span id="stat-ol-rate" class="font-bold text-sky-600">0%</span> Release Rate</p>
                     </div>
                     <div class="bg-sky-50 p-2.5 rounded-lg">
                         <i class="fa-solid fa-file-contract text-sky-600 text-sm"></i>
@@ -133,7 +193,7 @@
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Calls Handled</p>
                         <h3 id="stat-calls" class="text-xl font-bold text-slate-800 mt-1">0</h3>
-                        <p class="text-xs text-slate-500 mt-0.5"><span id="stat-connected" class="font-bold text-emerald-600">0</span> Connected</p>
+                        <p class="text-xs text-slate-500 mt-0.5"><span id="stat-connected" class="font-bold text-emerald-600">0</span> Connected (<span id="stat-call-rate" class="font-semibold text-emerald-600">0%</span>)</p>
                     </div>
                     <div class="bg-emerald-50 p-2.5 rounded-lg">
                         <i class="fa-solid fa-phone-volume text-emerald-600 text-sm"></i>
@@ -209,7 +269,7 @@
                     <div>
                         <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Off-boarding Letter Issued</p>
                         <h3 id="stat-offboard-issued" class="text-xl font-bold text-slate-800 mt-1">0</h3>
-                        <p class="text-xs text-slate-500 mt-0.5"><span class="font-bold text-rose-600">Issued</span></p>
+                        <p class="text-xs text-slate-500 mt-0.5"><span id="stat-offboard-rate" class="font-bold text-rose-600">0%</span> Completion</p>
                     </div>
                     <div class="bg-rose-50 p-2.5 rounded-lg">
                         <i class="fa-solid fa-file-circle-check text-rose-600 text-sm"></i>
@@ -298,40 +358,44 @@
                 </div>
             </div>
 
-            <!-- Team Scorecard Table -->
+            <!-- Team Scorecard Table with Sticky First Column & Sortable Headers -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-users mr-2 text-blue-600"></i>
-                        <span>Daily Team Scorecard</span>
-                    </h3>
-                    <button onclick="exportTableToCSV('daily_scorecard.csv')" class="text-xs text-slate-600 hover:text-blue-600 bg-white border border-slate-200 px-3 py-1 rounded-lg transition font-medium shadow-sm">
+                <div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2 bg-slate-50/50">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center">
+                            <i class="fa-solid fa-users mr-2 text-blue-600"></i>
+                            <span>Daily Team Scorecard</span>
+                        </h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Click any column header to sort &bull; Scroll right (HR Agent column stays pinned)</p>
+                    </div>
+                    <button onclick="exportTableToCSV('daily_scorecard.csv')" class="text-xs text-slate-600 hover:text-blue-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition font-medium shadow-sm">
                         <i class="fa-solid fa-download mr-1"></i> Export CSV
                     </button>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-xs">
-                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                <div class="table-scroll-wrap">
+                    <table class="min-w-full divide-y divide-slate-200 text-xs sticky-table">
+                        <thead class="text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
-                                <th class="px-3 py-3 text-left">HR Agent</th>
-                                <th class="px-3 py-3 text-center">OL Assigned</th>
-                                <th class="px-3 py-3 text-center">OL Released</th>
-                                <th class="px-3 py-3 text-center">Promo Released</th>
-                                <th class="px-3 py-3 text-center">Revised OL</th>
-                                <th class="px-3 py-3 text-center">Offboard Assigned</th>
-                                <th class="px-3 py-3 text-center">Offboard Issued</th>
-                                <th class="px-3 py-3 text-center">Calls Assigned</th>
-                                <th class="px-3 py-3 text-center">Connected</th>
-                                <th class="px-3 py-3 text-center">Not Connected</th>
-                                <th class="px-3 py-3 text-center">Docs Rec.</th>
-                                <th class="px-3 py-3 text-center">WA Cleared</th>
-                                <th class="px-3 py-3 text-center">Mails</th>
-                                <th class="px-3 py-3 text-center">Not Working</th>
-                                <th class="px-3 py-3 text-center">Selections (All)</th>
-                                <th class="px-3 py-3 text-center">OL Rel. (All)</th>
-                                <th class="px-3 py-3 text-center">Overall [d]</th>
-                                <th class="px-3 py-3 text-center">Overall [ss]</th>
-                                <th class="px-3 py-3 text-left">Other Works</th>
+                                <th onclick="sortDailyTable('agent')" class="px-3 py-3 text-left sticky-col sortable-th">HR Agent <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('date')" class="px-3 py-3 text-center sortable-th">Date <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('olAssigned')" class="px-3 py-3 text-center sortable-th">OL Assigned <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('olReleased')" class="px-3 py-3 text-center sortable-th">OL Released <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('promoReleased')" class="px-3 py-3 text-center sortable-th">Promo Released <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('revisedOlReleased')" class="px-3 py-3 text-center sortable-th">Revised OL <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('offboardAssigned')" class="px-3 py-3 text-center sortable-th">Offboard Assigned <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('offboardIssued')" class="px-3 py-3 text-center sortable-th">Offboard Issued <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('callsAssigned')" class="px-3 py-3 text-center sortable-th">Calls Assigned <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('connectedCalls')" class="px-3 py-3 text-center sortable-th">Connected <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('notConnectedCalls')" class="px-3 py-3 text-center sortable-th">Not Connected <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('docsReceived')" class="px-3 py-3 text-center sortable-th">Docs Rec. <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('whatsappCleared')" class="px-3 py-3 text-center sortable-th">WA Cleared <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('mails')" class="px-3 py-3 text-center sortable-th">Mails <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('notWorking')" class="px-3 py-3 text-center sortable-th">Not Working <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('selectionsAllClients')" class="px-3 py-3 text-center sortable-th">Selections (All) <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('olAllClients')" class="px-3 py-3 text-center sortable-th">OL Rel. (All) <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('overallSelectionsD')" class="px-3 py-3 text-center sortable-th">Overall [d] <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th onclick="sortDailyTable('overallSelectionsSS')" class="px-3 py-3 text-center sortable-th">Overall [ss] <i class="fa-solid fa-sort ml-1 text-slate-300"></i></th>
+                                <th class="px-3 py-3 text-left">Other Works (Click to Read)</th>
                             </tr>
                         </thead>
                         <tbody id="table-daily-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -342,7 +406,6 @@
 
         <!-- TAB CONTENT: WEEKLY -->
         <div id="content-weekly" class="tab-content space-y-6">
-            <!-- Trend Analysis Section -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div class="border-b border-slate-100 pb-3 mb-4">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center">
@@ -359,11 +422,11 @@
                         <span>Weekly Aggregated Summary</span>
                     </h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-xs">
-                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                <div class="table-scroll-wrap">
+                    <table class="min-w-full divide-y divide-slate-200 text-xs sticky-table">
+                        <thead class="text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
-                                <th class="px-3 py-3 text-left">Date</th>
+                                <th class="px-3 py-3 text-left sticky-col">Date</th>
                                 <th class="px-3 py-3 text-center">OL Assigned</th>
                                 <th class="px-3 py-3 text-center">OL Released</th>
                                 <th class="px-3 py-3 text-center">Promo Released</th>
@@ -405,11 +468,11 @@
                         <span>Team Monthly Cumulative Scorecard</span>
                     </h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200 text-xs">
-                        <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                <div class="table-scroll-wrap">
+                    <table class="min-w-full divide-y divide-slate-200 text-xs sticky-table">
+                        <thead class="text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
-                                <th class="px-3 py-3 text-left">HR Agent</th>
+                                <th class="px-3 py-3 text-left sticky-col">HR Agent</th>
                                 <th class="px-3 py-3 text-center">OL Assigned</th>
                                 <th class="px-3 py-3 text-center">OL Released</th>
                                 <th class="px-3 py-3 text-center">Promo Released</th>
@@ -425,7 +488,7 @@
                                 <th class="px-3 py-3 text-center">OL Rel. (All)</th>
                                 <th class="px-3 py-3 text-center">Overall [d]</th>
                                 <th class="px-3 py-3 text-center">Overall [ss]</th>
-                                <th class="px-3 py-3 text-left">Other Works</th>
+                                <th class="px-3 py-3 text-left">Other Works (Click to Read)</th>
                             </tr>
                         </thead>
                         <tbody id="table-monthly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
@@ -436,8 +499,24 @@
 
     </main>
 
-    <!-- AUTOMATED TEMPLATES MODAL -->
-    <div id="templateModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <!-- OTHER WORKS FULL-TEXT READER MODAL -->
+    <div id="otherWorksModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden flex items-center justify-center p-4 z-50" onclick="if(event.target===this) closeOtherWorksModal()">
+        <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <div>
+                    <h4 id="owModalAgent" class="text-sm font-bold text-slate-800">Agent Name</h4>
+                    <p id="owModalDate" class="text-[11px] text-slate-500">Other Works Details</p>
+                </div>
+                <button onclick="closeOtherWorksModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            </div>
+            <div class="p-5">
+                <p id="owModalBody" class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed bg-slate-50 p-3.5 rounded-lg border border-slate-200"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTOMATED TEMPLATES MODAL WITH WHATSAPP SHARE -->
+    <div id="templateModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden flex items-center justify-center p-4 z-50" onclick="if(event.target===this) toggleModal(false)">
         <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="p-4 border-b border-slate-200 flex justify-between items-center sticky top-0 bg-white z-10">
                 <h3 class="text-base font-bold text-slate-900 flex items-center">
@@ -447,15 +526,21 @@
                 <button onclick="toggleModal(false)" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
             </div>
             <div class="p-6 space-y-6">
-                <p class="text-xs text-slate-600">Copy these structured templates to format your reporting digests instantly. Placeholders dynamically reflect your current dashboard state.</p>
+                <p class="text-xs text-slate-600">Copy or send these structured digests directly to WhatsApp. Placeholders dynamically reflect your active dashboard filters.</p>
                 
                 <div class="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
                         <h4 class="text-xs font-bold text-slate-800">Daily Ops Digest</h4>
-                        <button onclick="copyToClipboard('daily-template', this)" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded transition font-semibold flex items-center space-x-1">
-                            <i class="fa-regular fa-copy"></i>
-                            <span>Copy Template</span>
-                        </button>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="shareOnWhatsApp('daily-template')" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded transition font-semibold flex items-center space-x-1">
+                                <i class="fa-brands fa-whatsapp"></i>
+                                <span>Share WhatsApp</span>
+                            </button>
+                            <button onclick="copyToClipboard('daily-template', this)" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded transition font-semibold flex items-center space-x-1">
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Copy</span>
+                            </button>
+                        </div>
                     </div>
                     <pre id="daily-template" class="text-[11px] font-mono text-slate-700 whitespace-pre-wrap bg-white p-3 rounded border border-slate-200 leading-relaxed">
 CANWIN HR OPERATIONS DAILY DIGEST
@@ -487,12 +572,18 @@ Summary Note: Operational metrics successfully compiled via Canwin Dashboard Eng
                 </div>
 
                 <div class="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
                         <h4 class="text-xs font-bold text-slate-800">Weekly Performance Trends</h4>
-                        <button onclick="copyToClipboard('weekly-template', this)" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded transition font-semibold flex items-center space-x-1">
-                            <i class="fa-regular fa-copy"></i>
-                            <span>Copy Template</span>
-                        </button>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="shareOnWhatsApp('weekly-template')" class="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded transition font-semibold flex items-center space-x-1">
+                                <i class="fa-brands fa-whatsapp"></i>
+                                <span>Share WhatsApp</span>
+                            </button>
+                            <button onclick="copyToClipboard('weekly-template', this)" class="text-[10px] bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded transition font-semibold flex items-center space-x-1">
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Copy</span>
+                            </button>
+                        </div>
                     </div>
                     <pre id="weekly-template" class="text-[11px] font-mono text-slate-700 whitespace-pre-wrap bg-white p-3 rounded border border-slate-200 leading-relaxed">
 CANWIN HR OPERATIONS WEEKLY TREND REPORT
@@ -521,9 +612,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
     <!-- FLOATING HR OPS CHATBOT WIDGET -->
     <div id="hrChatbotContainer" class="fixed bottom-5 right-5 z-50 flex flex-col items-end">
-        <!-- Chat Window -->
         <div id="hrChatWindow" class="hidden mb-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <!-- Chat Header -->
             <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center space-x-2.5">
                     <div class="bg-blue-600 p-1.5 rounded-lg">
@@ -541,46 +630,41 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 </button>
             </div>
 
-            <!-- Messages Feed -->
             <div id="chatMessages" class="p-3.5 h-72 overflow-y-auto space-y-3 bg-slate-50 text-xs">
                 <div class="flex items-start space-x-2">
                     <div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px]">
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm leading-relaxed">
-                        Hi! Ask me anything about your current dashboard view—like <strong>offer letters</strong>, <strong>selections</strong>, <strong>off-boarding</strong>, <strong>other works</strong>, <strong>top HR agent</strong>, or type an agent's name.
+                        Hi! Ask me anything about your current dashboard view—like <strong>pending agents</strong>, <strong>offer letters</strong>, <strong>selections</strong>, <strong>off-boarding</strong>, <strong>other works</strong>, or type an agent's name.
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Suggestion Chips -->
             <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto">
                 <button onclick="sendQuickPrompt('Full summary')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Full Summary</button>
-                <button onclick="sendQuickPrompt('Client selections')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">All Clients Selections</button>
+                <button onclick="sendQuickPrompt('Pending agents')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Pending Agents</button>
                 <button onclick="sendQuickPrompt('Other works')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Other Works</button>
-                <button onclick="sendQuickPrompt('Off boarding stats')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Off-Boarding</button>
+                <button onclick="sendQuickPrompt('Client selections')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">All Clients</button>
                 <button onclick="sendQuickPrompt('Top HR agent')" class="whitespace-nowrap text-[10px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-semibold px-2.5 py-1 rounded-full transition">Top Agent</button>
             </div>
 
-            <!-- Input Area -->
             <form onsubmit="handleChatSubmit(event)" class="p-2.5 bg-white border-t border-slate-200 flex items-center space-x-2">
-                <input type="text" id="chatInput" placeholder="Ask about metrics or an agent..." autocomplete="off" class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                <input type="text" id="chatInput" placeholder="Ask about metrics, pending, or an agent..." autocomplete="off" class="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </form>
         </div>
 
-        <!-- Floating Launcher Button -->
         <button onclick="toggleChatbot()" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4 py-3 shadow-lg flex items-center space-x-2 transition transform hover:scale-105">
             <i class="fa-solid fa-comment-dots text-base"></i>
             <span class="text-xs font-bold">Ask HR Bot</span>
         </button>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH PUBLISHED GOOGLE SHEET CSV SYNC & CHATBOT -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Pre-configured HR Team Roster (All 21 Unique Agents)
         const DEFAULT_HR_AGENTS = [
             'Balaji K',
             'Bilgundhe Nikitha',
@@ -605,20 +689,19 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             'Yuvaraju K'
         ];
 
-        // Live Published Google Sheets CSV Link
         const LIVE_CSV_PATH = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhJy2W1pB6b7z6gHgf6Lu5S6Ri0T1MuRAPLP5yo5FSjJWmfNGZBab-xUsyNzrbq7jWORyTLzH8GJdB/pub?gid=1336393646&single=true&output=csv';
         const FALLBACK_CSV_PATH = 'data/ops_data.csv';
         const AUTO_REFRESH_INTERVAL_MS = 15000;
 
-        // Global State Management
         let rawData = [];
         let filteredData = [];
+        let currentPendingAgents = [];
+        let dailySortState = { key: null, asc: false };
         let lettersChartInstance = null;
         let callChartInstance = null;
         let weeklyChartInstance = null;
         let monthlyOutputChart = null;
 
-        // Validation & Parsing Utilities
         function parseNumeric(val) {
             if (typeof val === 'number') return val;
             if (!val) return 0;
@@ -638,7 +721,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             return '';
         }
 
-        // Handles DD/MM/YYYY (e.g. 18/11/2026) and YYYY-MM-DD timestamps
         function formatDate(timestampStr) {
             if (!timestampStr) return 'Unknown';
             const rawDate = String(timestampStr).trim().split(' ')[0];
@@ -652,13 +734,18 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             return rawDate;
         }
 
-        // Core App Initialization
+        function toLocalISODate(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             populateFilterDropdowns();
             renderMonthlyView();
             setupEventListeners();
             initLiveCSVData();
-
             setInterval(() => initLiveCSVData(true), AUTO_REFRESH_INTERVAL_MS);
         });
 
@@ -759,7 +846,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             });
         }
 
-        // UI & Filter Management (Deduplicated case-insensitively)
         function getAllKnownAgents() {
             const map = new Map();
             DEFAULT_HR_AGENTS.forEach(a => map.set(a.trim().toLowerCase(), a.trim()));
@@ -776,41 +862,106 @@ Weekly output tracked and visualised. Team throughput meets expected operational
 
         function populateFilterDropdowns() {
             const agents = getAllKnownAgents();
-
             const agentSelect = document.getElementById('agentFilter');
             const currentSelectedAgent = agentSelect.value;
-            agentSelect.innerHTML = '<option value="all">All Agents</option>';
+            agentSelect.innerHTML = `<option value="all">All Agents (${agents.length})</option>`;
             agents.forEach(a => {
                 agentSelect.innerHTML += `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`;
             });
             if (agents.includes(currentSelectedAgent)) agentSelect.value = currentSelectedAgent;
         }
 
+        // Quick Date Presets
+        function highlightPresetButton(activeId) {
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('border-blue-600', 'bg-blue-600', 'text-white');
+                btn.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-600');
+            });
+            if (activeId) {
+                const el = document.getElementById(activeId);
+                if (el) {
+                    el.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-600');
+                    el.classList.add('border-blue-600', 'bg-blue-600', 'text-white');
+                }
+            }
+        }
+
+        function setDatePreset(preset, btnEl) {
+            const now = new Date();
+            const startInput = document.getElementById('startDate');
+            const endInput = document.getElementById('endDate');
+
+            if (preset === 'today') {
+                const todayStr = toLocalISODate(now);
+                startInput.value = todayStr;
+                endInput.value = todayStr;
+            } else if (preset === 'yesterday') {
+                const yest = new Date(now);
+                yest.setDate(now.getDate() - 1);
+                const yestStr = toLocalISODate(yest);
+                startInput.value = yestStr;
+                endInput.value = yestStr;
+            } else if (preset === 'week') {
+                const day = now.getDay();
+                const diffToMonday = day === 0 ? 6 : day - 1;
+                const monday = new Date(now);
+                monday.setDate(now.getDate() - diffToMonday);
+                startInput.value = toLocalISODate(monday);
+                endInput.value = toLocalISODate(now);
+            } else if (preset === 'month') {
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                startInput.value = toLocalISODate(firstDay);
+                endInput.value = toLocalISODate(now);
+            } else {
+                startInput.value = '';
+                endInput.value = '';
+            }
+
+            highlightPresetButton(btnEl ? btnEl.id : `preset-${preset}`);
+            applyFilters();
+        }
+
+        function onManualFilterChange() {
+            highlightPresetButton(null);
+            applyFilters();
+        }
+
         function applyFilters() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             const selectedAgent = document.getElementById('agentFilter').value;
+            const searchTerm = (document.getElementById('quickSearchInput').value || '').trim().toLowerCase();
 
             filteredData = rawData.filter(item => {
                 const matchStart = !startDate || (item.date !== 'Unknown' && item.date >= startDate);
                 const matchEnd = !endDate || (item.date !== 'Unknown' && item.date <= endDate);
                 const matchAgent = (selectedAgent === 'all' || item.agent.toLowerCase() === selectedAgent.toLowerCase());
-                return matchStart && matchEnd && matchAgent;
+                const matchSearch = !searchTerm ||
+                    item.agent.toLowerCase().includes(searchTerm) ||
+                    item.otherWorks.toLowerCase().includes(searchTerm) ||
+                    item.date.includes(searchTerm);
+                return matchStart && matchEnd && matchAgent && matchSearch;
             });
+
+            if (dailySortState.key) {
+                applyDailySort();
+            }
 
             const badges = [];
             if (startDate && endDate) {
-                badges.push(`Dates: ${startDate} to ${endDate}`);
+                badges.push(startDate === endDate ? `Date: ${startDate}` : `${startDate} to ${endDate}`);
             } else if (startDate) {
                 badges.push(`From: ${startDate}`);
             } else if (endDate) {
                 badges.push(`Until: ${endDate}`);
             }
             if (selectedAgent !== 'all') badges.push(`Agent: ${selectedAgent}`);
+            if (searchTerm) badges.push(`Search: "${searchTerm}"`);
+
             const syncTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             document.getElementById('activeFiltersBadge').innerText = badges.length > 0
-                ? `Filtering by [ ${badges.join(' | ')} ] • Synced ${syncTime}`
-                : `Showing live dataset (${rawData.length} records) • Synced ${syncTime}`;
+                ? `[ ${badges.join(' | ')} ] • ${filteredData.length} rows • Synced ${syncTime}`
+                : `${rawData.length} total records • Synced ${syncTime}`;
 
             refreshDashboardUI();
         }
@@ -819,14 +970,41 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             document.getElementById('agentFilter').value = 'all';
+            document.getElementById('quickSearchInput').value = '';
+            dailySortState = { key: null, asc: false };
+            highlightPresetButton('preset-all');
             applyFilters();
         }
 
         function resetDashboard() {
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            document.getElementById('agentFilter').value = 'all';
             initLiveCSVData(false);
+        }
+
+        // Table Sorting
+        function sortDailyTable(key) {
+            if (dailySortState.key === key) {
+                dailySortState.asc = !dailySortState.asc;
+            } else {
+                dailySortState.key = key;
+                dailySortState.asc = (key === 'agent');
+            }
+            applyDailySort();
+            renderDailyView();
+        }
+
+        function applyDailySort() {
+            const { key, asc } = dailySortState;
+            if (!key) return;
+            filteredData.sort((a, b) => {
+                const valA = a[key];
+                const valB = b[key];
+                if (typeof valA === 'number' && typeof valB === 'number') {
+                    return asc ? valA - valB : valB - valA;
+                }
+                return asc
+                    ? String(valA).localeCompare(String(valB))
+                    : String(valB).localeCompare(String(valA));
+            });
         }
 
         function switchTab(tabId) {
@@ -861,8 +1039,73 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
         }
 
-        // Main Dashboard UI Refresh Orchestrator
+        // Other Works Reader Modal
+        function openOtherWorksModal(agent, date, text) {
+            document.getElementById('owModalAgent').innerText = agent;
+            document.getElementById('owModalDate').innerText = date ? `Logged on ${date}` : 'Other Works Details';
+            document.getElementById('owModalBody').innerText = text;
+            document.getElementById('otherWorksModal').classList.remove('hidden');
+        }
+
+        function closeOtherWorksModal() {
+            document.getElementById('otherWorksModal').classList.add('hidden');
+        }
+
+        // Pending / Missing Submissions Tracker
+        function updateSubmissionTracker() {
+            const allAgents = getAllKnownAgents();
+            const submittedSet = new Set(filteredData.map(r => r.agent.trim().toLowerCase()));
+            currentPendingAgents = allAgents.filter(a => !submittedSet.has(a.toLowerCase()));
+            const submittedCount = allAgents.length - currentPendingAgents.length;
+
+            document.getElementById('submittedCountBadge').innerText = `${submittedCount} / ${allAgents.length} Agents Logged`;
+            const pendingBadge = document.getElementById('pendingCountBadge');
+            const statusIcon = document.getElementById('submissionStatusIcon');
+
+            if (currentPendingAgents.length === 0) {
+                pendingBadge.innerText = 'All Submitted';
+                pendingBadge.className = 'ml-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full';
+                statusIcon.className = 'bg-emerald-100 text-emerald-700 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold';
+                statusIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                pendingBadge.innerText = `${currentPendingAgents.length} Pending`;
+                pendingBadge.className = 'ml-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full';
+                statusIcon.className = 'bg-amber-100 text-amber-700 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold';
+                statusIcon.innerHTML = '<i class="fa-solid fa-user-clock"></i>';
+            }
+
+            const chipsContainer = document.getElementById('pendingAgentsChips');
+            if (currentPendingAgents.length === 0) {
+                chipsContainer.innerHTML = '<span class="text-xs text-emerald-600 font-medium">All 21 HR agents have submitted logs for this view.</span>';
+            } else {
+                chipsContainer.innerHTML = currentPendingAgents.map(name =>
+                    `<span class="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md font-medium">${escapeHtml(name)}</span>`
+                ).join('');
+            }
+        }
+
+        function togglePendingChips() {
+            const container = document.getElementById('pendingAgentsChips');
+            const btn = document.getElementById('togglePendingBtn');
+            const isHidden = container.classList.toggle('hidden');
+            btn.innerHTML = isHidden
+                ? 'Show Names <i class="fa-solid fa-chevron-down ml-0.5"></i>'
+                : 'Hide Names <i class="fa-solid fa-chevron-up ml-0.5"></i>';
+        }
+
+        function copyPendingAgentsList(btn) {
+            const text = currentPendingAgents.length === 0
+                ? 'All 21 HR agents have submitted their ops report!'
+                : `Pending HR Ops Report Submission (${currentPendingAgents.length}):\n` + currentPendingAgents.map((n, i) => `${i + 1}. ${n}`).join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied!</span>';
+                setTimeout(() => { btn.innerHTML = orig; }, 2000);
+            });
+        }
+
         function refreshDashboardUI() {
+            updateSubmissionTracker();
             updateKPICards();
             renderDailyView();
             renderWeeklyView();
@@ -870,7 +1113,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             updateTemplatePlaceholders();
         }
 
-        // Calculation Engines
         function updateKPICards() {
             let totalOLAssigned = 0, totalOLReleased = 0;
             let totalCalls = 0, totalConnected = 0;
@@ -903,10 +1145,18 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 }
             });
 
+            const pendingOL = Math.max(0, totalOLAssigned - totalOLReleased);
+            const olRate = totalOLAssigned > 0 ? Math.round((totalOLReleased / totalOLAssigned) * 100) : 0;
+            const callRate = totalCalls > 0 ? Math.round((totalConnected / totalCalls) * 100) : 0;
+            const offboardRate = totalOffboardAssigned > 0 ? Math.round((totalOffboardIssued / totalOffboardAssigned) * 100) : 0;
+
             document.getElementById('stat-ol-assigned').innerText = totalOLAssigned.toLocaleString();
+            document.getElementById('stat-ol-pending').innerText = pendingOL.toLocaleString();
             document.getElementById('stat-ol-released').innerText = totalOLReleased.toLocaleString();
+            document.getElementById('stat-ol-rate').innerText = `${olRate}%`;
             document.getElementById('stat-calls').innerText = totalCalls.toLocaleString();
             document.getElementById('stat-connected').innerText = totalConnected.toLocaleString();
+            document.getElementById('stat-call-rate').innerText = `${callRate}%`;
             document.getElementById('stat-docs').innerText = totalDocs.toLocaleString();
             document.getElementById('stat-whatsapp').innerText = totalWA.toLocaleString();
             document.getElementById('stat-mails').innerText = totalMails.toLocaleString();
@@ -915,6 +1165,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             document.getElementById('stat-revised-ol').innerText = totalRevisedOL.toLocaleString();
             document.getElementById('stat-offboard-assigned').innerText = totalOffboardAssigned.toLocaleString();
             document.getElementById('stat-offboard-issued').innerText = totalOffboardIssued.toLocaleString();
+            document.getElementById('stat-offboard-rate').innerText = `${offboardRate}%`;
 
             document.getElementById('stat-mails-card').innerText = totalMails.toLocaleString();
             document.getElementById('stat-selections-received').innerText = totalSelAll.toLocaleString();
@@ -933,37 +1184,52 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             }
         }
 
-        // Render Daily View
         function renderDailyView() {
             const tbody = document.getElementById('table-daily-body');
             tbody.innerHTML = '';
 
-            filteredData.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap">${escapeHtml(row.agent)}</td>
-                    <td class="px-3 py-3 text-center text-slate-600">${row.olAssigned}</td>
-                    <td class="px-3 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
-                    <td class="px-3 py-3 text-center font-bold text-indigo-600">${row.promoReleased}</td>
-                    <td class="px-3 py-3 text-center font-bold text-cyan-600">${row.revisedOlReleased}</td>
-                    <td class="px-3 py-3 text-center text-orange-600">${row.offboardAssigned}</td>
-                    <td class="px-3 py-3 text-center font-bold text-rose-600">${row.offboardIssued}</td>
-                    <td class="px-3 py-3 text-center text-slate-600">${row.callsAssigned}</td>
-                    <td class="px-3 py-3 text-center font-bold text-emerald-600">${row.connectedCalls}</td>
-                    <td class="px-3 py-3 text-center text-rose-600">${row.notConnectedCalls}</td>
-                    <td class="px-3 py-3 text-center font-bold text-amber-600">${row.docsReceived}</td>
-                    <td class="px-3 py-3 text-center font-bold text-purple-600">${row.whatsappCleared}</td>
-                    <td class="px-3 py-3 text-center font-semibold text-slate-700">${row.mails}</td>
-                    <td class="px-3 py-3 text-center text-slate-400">${row.notWorking}</td>
-                    <td class="px-3 py-3 text-center font-bold text-teal-600">${row.selectionsAllClients}</td>
-                    <td class="px-3 py-3 text-center font-bold text-violet-600">${row.olAllClients}</td>
-                    <td class="px-3 py-3 text-center font-bold text-fuchsia-600">${row.overallSelectionsD}</td>
-                    <td class="px-3 py-3 text-center font-bold text-fuchsia-700">${row.overallSelectionsSS}</td>
-                    <td class="px-3 py-3 text-left text-slate-600 max-w-xs truncate" title="${escapeHtml(row.otherWorks)}">${escapeHtml(row.otherWorks || '-')}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="20" class="px-4 py-8 text-center text-slate-400">No records found for the selected filter view.</td></tr>`;
+            } else {
+                filteredData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+
+                    const owCell = row.otherWorks
+                        ? `<button type="button" class="text-left text-blue-600 hover:underline max-w-[200px] truncate block" title="Click to read full note">${escapeHtml(row.otherWorks)}</button>`
+                        : `<span class="text-slate-400">-</span>`;
+
+                    tr.innerHTML = `
+                        <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap sticky-col">${escapeHtml(row.agent)}</td>
+                        <td class="px-3 py-3 text-center text-slate-500 whitespace-nowrap">${escapeHtml(row.date)}</td>
+                        <td class="px-3 py-3 text-center text-slate-600">${row.olAssigned}</td>
+                        <td class="px-3 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
+                        <td class="px-3 py-3 text-center font-bold text-indigo-600">${row.promoReleased}</td>
+                        <td class="px-3 py-3 text-center font-bold text-cyan-600">${row.revisedOlReleased}</td>
+                        <td class="px-3 py-3 text-center text-orange-600">${row.offboardAssigned}</td>
+                        <td class="px-3 py-3 text-center font-bold text-rose-600">${row.offboardIssued}</td>
+                        <td class="px-3 py-3 text-center text-slate-600">${row.callsAssigned}</td>
+                        <td class="px-3 py-3 text-center font-bold text-emerald-600">${row.connectedCalls}</td>
+                        <td class="px-3 py-3 text-center text-rose-600">${row.notConnectedCalls}</td>
+                        <td class="px-3 py-3 text-center font-bold text-amber-600">${row.docsReceived}</td>
+                        <td class="px-3 py-3 text-center font-bold text-purple-600">${row.whatsappCleared}</td>
+                        <td class="px-3 py-3 text-center font-semibold text-slate-700">${row.mails}</td>
+                        <td class="px-3 py-3 text-center text-slate-400">${row.notWorking}</td>
+                        <td class="px-3 py-3 text-center font-bold text-teal-600">${row.selectionsAllClients}</td>
+                        <td class="px-3 py-3 text-center font-bold text-violet-600">${row.olAllClients}</td>
+                        <td class="px-3 py-3 text-center font-bold text-fuchsia-600">${row.overallSelectionsD}</td>
+                        <td class="px-3 py-3 text-center font-bold text-fuchsia-700">${row.overallSelectionsSS}</td>
+                        <td class="px-3 py-3 text-left ow-cell">${owCell}</td>
+                    `;
+
+                    if (row.otherWorks) {
+                        tr.querySelector('.ow-cell button').addEventListener('click', () => {
+                            openOtherWorksModal(row.agent, row.date, row.otherWorks);
+                        });
+                    }
+                    tbody.appendChild(tr);
+                });
+            }
 
             let sumOLAssigned = 0, sumOLReleased = 0, sumPromo = 0, sumRevised = 0, sumOffboardIssued = 0;
             let totalConn = 0, totalNotConn = 0;
@@ -1006,7 +1272,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             });
         }
 
-        // Render Weekly View
         function renderWeeklyView() {
             const dailyMap = {};
             filteredData.forEach(row => {
@@ -1039,7 +1304,7 @@ Weekly output tracked and visualised. Team throughput meets expected operational
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-bold text-slate-800 whitespace-nowrap">${date}</td>
+                    <td class="px-3 py-3 font-bold text-slate-800 whitespace-nowrap sticky-col">${date}</td>
                     <td class="px-3 py-3 text-center text-slate-600">${d.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-semibold text-blue-600">${d.ol}</td>
                     <td class="px-3 py-3 text-center font-semibold text-indigo-600">${d.promo}</td>
@@ -1075,7 +1340,6 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             });
         }
 
-        // Render Monthly View (Includes all 21 pre-configured HR Agents + Other Works)
         function renderMonthlyView() {
             const selectedAgent = document.getElementById('agentFilter').value;
             const agentSummary = {};
@@ -1116,344 +1380,5 @@ Weekly output tracked and visualised. Team throughput meets expected operational
             const sortedAgents = Object.keys(agentSummary).sort((a, b) => a.localeCompare(b));
             sortedAgents.forEach(agent => {
                 const s = agentSummary[agent];
-                const combinedOtherWorks = s.otherWorksSet.size > 0 ? [...s.otherWorksSet].join(' | ') : '-';
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="px-3 py-3 font-bold text-slate-800 whitespace-nowrap">${escapeHtml(agent)}</td>
-                    <td class="px-3 py-3 text-center text-slate-600">${s.olAssigned}</td>
-                    <td class="px-3 py-3 text-center font-bold text-blue-600">${s.ol}</td>
-                    <td class="px-3 py-3 text-center font-bold text-indigo-600">${s.promo}</td>
-                    <td class="px-3 py-3 text-center font-bold text-cyan-600">${s.revisedOl}</td>
-                    <td class="px-3 py-3 text-center text-orange-600">${s.offAssign}</td>
-                    <td class="px-3 py-3 text-center font-bold text-rose-600">${s.offIssue}</td>
-                    <td class="px-3 py-3 text-center font-bold text-emerald-600">${s.calls}</td>
-                    <td class="px-3 py-3 text-center font-bold text-amber-600">${s.docs}</td>
-                    <td class="px-3 py-3 text-center font-bold text-purple-600">${s.wa}</td>
-                    <td class="px-3 py-3 text-center font-semibold text-slate-700">${s.mails}</td>
-                    <td class="px-3 py-3 text-center font-semibold text-slate-500">${s.nw}</td>
-                    <td class="px-3 py-3 text-center font-bold text-teal-600">${s.selAll}</td>
-                    <td class="px-3 py-3 text-center font-bold text-violet-600">${s.olAll}</td>
-                    <td class="px-3 py-3 text-center font-bold text-fuchsia-600">${s.ovD}</td>
-                    <td class="px-3 py-3 text-center font-bold text-fuchsia-700">${s.ovSS}</td>
-                    <td class="px-3 py-3 text-left text-slate-600 max-w-xs truncate" title="${escapeHtml(combinedOtherWorks)}">${escapeHtml(combinedOtherWorks)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            if (monthlyOutputChart) monthlyOutputChart.destroy();
-            const monthlyCtx = document.getElementById('monthlyOutputChart').getContext('2d');
-            monthlyOutputChart = new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: sortedAgents,
-                    datasets: [
-                        { label: 'Offer Letters Released', data: sortedAgents.map(a => agentSummary[a].ol), backgroundColor: '#2563eb', borderRadius: 4 },
-                        { label: 'Connected Calls', data: sortedAgents.map(a => agentSummary[a].calls), backgroundColor: '#10b981', borderRadius: 4 },
-                        { label: 'Documents Processed', data: sortedAgents.map(a => agentSummary[a].docs), backgroundColor: '#f59e0b', borderRadius: 4 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
-            });
-        }
-
-        // Automated Template Placeholders Update Logic
-        function updateTemplatePlaceholders() {
-            let totalOLAssigned = 0, totalOL = 0, totalCalls = 0, totalDocs = 0, totalWA = 0, totalMails = 0;
-            let totalPromo = 0, totalRevisedOL = 0, totalOffboardAssigned = 0, totalOffboardIssued = 0;
-            let totalSelAll = 0, totalOlAll = 0, totalOverallD = 0, totalOverallSS = 0;
-            const otherWorksList = [];
-
-            filteredData.forEach(row => {
-                totalOLAssigned += row.olAssigned;
-                totalOL += row.olReleased;
-                totalCalls += row.connectedCalls;
-                totalDocs += row.docsReceived;
-                totalWA += row.whatsappCleared;
-                totalMails += row.mails;
-                totalPromo += row.promoReleased;
-                totalRevisedOL += row.revisedOlReleased;
-                totalOffboardAssigned += row.offboardAssigned;
-                totalOffboardIssued += row.offboardIssued;
-                totalSelAll += row.selectionsAllClients;
-                totalOlAll += row.olAllClients;
-                totalOverallD += row.overallSelectionsD;
-                totalOverallSS += row.overallSelectionsSS;
-                if (row.otherWorks) {
-                    otherWorksList.push(`- ${row.agent}: ${row.otherWorks}`);
-                }
-            });
-
-            const uniqueDates = [...new Set(filteredData.map(r => r.date))].sort();
-            const dateRangeText = uniqueDates.length > 0 ? `${uniqueDates[0]} to ${uniqueDates[uniqueDates.length - 1]}` : 'N/A';
-
-            document.querySelectorAll('#templateModal .template-var').forEach(el => {
-                const v = el.getAttribute('data-var');
-                if (v === 'currentDate') el.innerText = new Date().toLocaleDateString();
-                if (v === 'total-ol-assigned') el.innerText = totalOLAssigned;
-                if (v === 'total-ol') el.innerText = totalOL;
-                if (v === 'total-promo') el.innerText = totalPromo;
-                if (v === 'total-revised-ol') el.innerText = totalRevisedOL;
-                if (v === 'total-offboard-assigned') el.innerText = totalOffboardAssigned;
-                if (v === 'total-offboard-issued') el.innerText = totalOffboardIssued;
-                if (v === 'total-calls') el.innerText = totalCalls;
-                if (v === 'total-docs') el.innerText = totalDocs;
-                if (v === 'total-wa') el.innerText = totalWA;
-                if (v === 'total-mails') el.innerText = totalMails;
-                if (v === 'total-sel-all') el.innerText = totalSelAll;
-                if (v === 'total-ol-all') el.innerText = totalOlAll;
-                if (v === 'total-overall-d') el.innerText = totalOverallD;
-                if (v === 'total-overall-ss') el.innerText = totalOverallSS;
-                if (v === 'total-other-works') el.innerText = otherWorksList.length > 0 ? otherWorksList.join('\n') : 'None';
-                if (v === 'w-total-ol-assigned') el.innerText = totalOLAssigned;
-                if (v === 'w-total-ol') el.innerText = totalOL;
-                if (v === 'w-total-promo') el.innerText = totalPromo;
-                if (v === 'w-total-revised-ol') el.innerText = totalRevisedOL;
-                if (v === 'w-total-offboard-assigned') el.innerText = totalOffboardAssigned;
-                if (v === 'w-total-offboard-issued') el.innerText = totalOffboardIssued;
-                if (v === 'w-total-calls') el.innerText = totalCalls;
-                if (v === 'w-total-docs') el.innerText = totalDocs;
-                if (v === 'w-total-mails') el.innerText = totalMails;
-                if (v === 'w-total-sel-all') el.innerText = totalSelAll;
-                if (v === 'w-total-ol-all') el.innerText = totalOlAll;
-                if (v === 'weekRange') el.innerText = dateRangeText;
-            });
-        }
-
-        // ================= CHATBOT ENGINE =================
-        function toggleChatbot() {
-            const win = document.getElementById('hrChatWindow');
-            win.classList.toggle('hidden');
-            if (!win.classList.contains('hidden')) {
-                document.getElementById('chatInput').focus();
-            }
-        }
-
-        function sendQuickPrompt(text) {
-            document.getElementById('chatInput').value = text;
-            handleChatSubmit(new Event('submit'));
-        }
-
-        function handleChatSubmit(e) {
-            e.preventDefault();
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if (!msg) return;
-
-            appendChatMessage(msg, 'user');
-            input.value = '';
-
-            setTimeout(() => {
-                const reply = generateBotResponse(msg);
-                appendChatMessage(reply, 'bot');
-            }, 250);
-        }
-
-        function appendChatMessage(htmlContent, sender) {
-            const container = document.getElementById('chatMessages');
-            const wrapper = document.createElement('div');
-            wrapper.className = sender === 'user' ? 'flex justify-end' : 'flex items-start space-x-2';
-
-            if (sender === 'user') {
-                wrapper.innerHTML = `<div class="bg-blue-600 text-white rounded-xl rounded-tr-none px-3 py-2 max-w-[80%] shadow-sm">${escapeHtml(htmlContent)}</div>`;
-            } else {
-                wrapper.innerHTML = `
-                    <div class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px]">
-                        <i class="fa-solid fa-robot"></i>
-                    </div>
-                    <div class="bg-white border border-slate-200 rounded-xl rounded-tl-none p-2.5 text-slate-700 shadow-sm max-w-[85%] leading-relaxed">${htmlContent}</div>
-                `;
-            }
-            container.appendChild(wrapper);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function generateBotResponse(query) {
-            const q = query.toLowerCase();
-
-            // Check if query mentions any known HR Agent
-            const allAgents = getAllKnownAgents();
-            const matchedAgent = allAgents.find(a => q.includes(a.toLowerCase()));
-            if (matchedAgent) {
-                const rows = filteredData.filter(r => r.agent.toLowerCase() === matchedAgent.toLowerCase());
-                if (rows.length === 0) {
-                    return `<strong>${escapeHtml(matchedAgent)}</strong> currently has <strong>0 records</strong> in the active filter view.`;
-                }
-                const ag = rows.reduce((a, r) => {
-                    a.olA += r.olAssigned; a.olR += r.olReleased; a.promo += r.promoReleased;
-                    a.rev += r.revisedOlReleased; a.offA += r.offboardAssigned; a.offI += r.offboardIssued;
-                    a.calls += r.connectedCalls; a.docs += r.docsReceived; a.wa += r.whatsappCleared;
-                    a.mails += r.mails; a.sel += r.selectionsAllClients; a.olAll += r.olAllClients;
-                    if (r.otherWorks) a.works.add(r.otherWorks);
-                    return a;
-                }, { olA: 0, olR: 0, promo: 0, rev: 0, offA: 0, offI: 0, calls: 0, docs: 0, wa: 0, mails: 0, sel: 0, olAll: 0, works: new Set() });
-
-                const worksText = ag.works.size > 0 ? escapeHtml([...ag.works].join(', ')) : 'None';
-                return `<strong>${escapeHtml(matchedAgent)}</strong> (${rows.length} logs):<br>
-                • Offer Letters: <strong>${ag.olR}</strong> released / ${ag.olA} assigned<br>
-                • Promotion: <strong>${ag.promo}</strong> | Revised OL: <strong>${ag.rev}</strong><br>
-                • Off-boarding: <strong>${ag.offI}</strong> issued / ${ag.offA} assigned<br>
-                • Calls Connected: <strong>${ag.calls}</strong> | Docs: <strong>${ag.docs}</strong> | WA: <strong>${ag.wa}</strong> | Mails: <strong>${ag.mails}</strong><br>
-                • All Clients Selections: <strong>${ag.sel}</strong> | OL (All Clients): <strong>${ag.olAll}</strong><br>
-                • Other Works: <strong>${worksText}</strong>`;
-            }
-
-            if (q.includes('team') || q.includes('agent list') || q.includes('employees') || q.includes('roster')) {
-                return `<strong>HR Operations Team (${allAgents.length} Agents):</strong><br>• ${allAgents.map(a => escapeHtml(a)).join('<br>• ')}`;
-            }
-
-            if (!filteredData || filteredData.length === 0) {
-                return "No records match the current filters (or Google Sheet hasn't synced yet). Try clearing filters or checking your published CSV link.";
-            }
-
-            // Other Works query
-            if (q.includes('other') || q.includes('work') || q.includes('task') || q.includes('note')) {
-                const works = filteredData.filter(r => r.otherWorks).map(r => `• <strong>${escapeHtml(r.agent)}</strong> (${escapeHtml(r.date)}): ${escapeHtml(r.otherWorks)}`);
-                if (works.length === 0) {
-                    return "No <strong>Other Works</strong> entries are logged in the current view.";
-                }
-                return `<strong>Other Works Logged (${works.length}):</strong><br>${works.slice(0, 10).join('<br>')}${works.length > 10 ? `<br><em>...and ${works.length - 10} more</em>` : ''}`;
-            }
-
-            // Aggregate current filtered data
-            const totals = filteredData.reduce((acc, r) => {
-                acc.olAssigned += r.olAssigned;
-                acc.olReleased += r.olReleased;
-                acc.promo += r.promoReleased;
-                acc.revisedOl += r.revisedOlReleased;
-                acc.offAssign += r.offboardAssigned;
-                acc.offIssue += r.offboardIssued;
-                acc.callsAssigned += r.callsAssigned;
-                acc.connected += r.connectedCalls;
-                acc.notConnected += r.notConnectedCalls;
-                acc.docs += r.docsReceived;
-                acc.wa += r.whatsappCleared;
-                acc.mails += r.mails;
-                acc.nw += r.notWorking;
-                acc.selAll += r.selectionsAllClients;
-                acc.olAll += r.olAllClients;
-                acc.ovD += r.overallSelectionsD;
-                acc.ovSS += r.overallSelectionsSS;
-                return acc;
-            }, {
-                olAssigned: 0, olReleased: 0, promo: 0, revisedOl: 0,
-                offAssign: 0, offIssue: 0, callsAssigned: 0, connected: 0,
-                notConnected: 0, docs: 0, wa: 0, mails: 0, nw: 0,
-                selAll: 0, olAll: 0, ovD: 0, ovSS: 0
-            });
-
-            // Top / Best Agent
-            if (q.includes('top') || q.includes('best') || q.includes('performer') || q.includes('highest')) {
-                const byAgent = {};
-                filteredData.forEach(r => {
-                    if (!byAgent[r.agent]) byAgent[r.agent] = { ol: 0, calls: 0, docs: 0 };
-                    byAgent[r.agent].ol += r.olReleased;
-                    byAgent[r.agent].calls += r.connectedCalls;
-                    byAgent[r.agent].docs += r.docsReceived;
-                });
-                const sorted = Object.entries(byAgent).sort((a, b) => b[1].ol - a[1].ol);
-                const [topName, topStats] = sorted[0];
-                return `🏆 <strong>Top Performer (by Offer Letters Released):</strong><br>
-                <strong>${escapeHtml(topName)}</strong> leads with <strong>${topStats.ol}</strong> offer letters released, <strong>${topStats.calls}</strong> connected calls, and <strong>${topStats.docs}</strong> documents processed.`;
-            }
-
-            // Client Selections
-            if (q.includes('selection') || q.includes('client') || q.includes('overall')) {
-                return `<strong>All Clients Selections Summary:</strong><br>
-                • Selections Received From All Clients: <strong>${totals.selAll.toLocaleString()}</strong><br>
-                • OL Released from All Clients: <strong>${totals.olAll.toLocaleString()}</strong><br>
-                • Overall Selections (All Client) [d]: <strong>${totals.ovD.toLocaleString()}</strong><br>
-                • Overall Selections (All Client) [ss]: <strong>${totals.ovSS.toLocaleString()}</strong>`;
-            }
-
-            // Off-boarding
-            if (q.includes('off') || q.includes('exit') || q.includes('boarding')) {
-                return `<strong>Off-boarding Summary:</strong><br>
-                • Off-boarding Letter Assigned: <strong>${totals.offAssign.toLocaleString()}</strong><br>
-                • Off-boarding Letter Issued: <strong>${totals.offIssue.toLocaleString()}</strong>`;
-            }
-
-            // Offer / Promotion / Revised Letters
-            if (q.includes('offer') || q.includes('promo') || q.includes('revised') || q.includes('letter') || q.includes('ol')) {
-                return `<strong>Letters Breakdown (${filteredData.length} records):</strong><br>
-                • Offer Letter Assigned: <strong>${totals.olAssigned.toLocaleString()}</strong><br>
-                • Offer Letter Released: <strong>${totals.olReleased.toLocaleString()}</strong><br>
-                • Promotion Letter Released: <strong>${totals.promo.toLocaleString()}</strong><br>
-                • Revised Offer Letter Released: <strong>${totals.revisedOl.toLocaleString()}</strong><br>
-                • OL Released from All Clients: <strong>${totals.olAll.toLocaleString()}</strong>`;
-            }
-
-            // Calls
-            if (q.includes('call') || q.includes('connect')) {
-                const rate = totals.callsAssigned > 0 ? Math.round((totals.connected / totals.callsAssigned) * 100) : 0;
-                return `<strong>Call Performance:</strong><br>
-                • Total Calls Handled: <strong>${totals.callsAssigned.toLocaleString()}</strong><br>
-                • Connected: <strong>${totals.connected.toLocaleString()}</strong> (${rate}%)<br>
-                • Not Connected: <strong>${totals.notConnected.toLocaleString()}</strong>`;
-            }
-
-            // Docs, WhatsApp & Mails
-            if (q.includes('doc') || q.includes('whatsapp') || q.includes('wa') || q.includes('chat') || q.includes('mail')) {
-                return `<strong>Docs, WhatsApp & Mails:</strong><br>
-                • Documents Received: <strong>${totals.docs.toLocaleString()}</strong><br>
-                • WhatsApp Chats Cleared: <strong>${totals.wa.toLocaleString()}</strong><br>
-                • Mails: <strong>${totals.mails.toLocaleString()}</strong>`;
-            }
-
-            // Default Full Summary
-            return `<strong>Current View Summary (${filteredData.length} records):</strong><br>
-            • Offer Letters: <strong>${totals.olReleased}</strong> released / ${totals.olAssigned} assigned<br>
-            • Promo: <strong>${totals.promo}</strong> | Revised OL: <strong>${totals.revisedOl}</strong><br>
-            • Off-boarding: <strong>${totals.offIssue}</strong> issued / ${totals.offAssign} assigned<br>
-            • Calls Connected: <strong>${totals.connected}</strong> / ${totals.callsAssigned}<br>
-            • Docs: <strong>${totals.docs}</strong> | WA: <strong>${totals.wa}</strong> | Mails: <strong>${totals.mails}</strong><br>
-            • All Clients Selections: <strong>${totals.selAll}</strong> | OL (All Clients): <strong>${totals.olAll}</strong>`;
-        }
-
-        function copyToClipboard(elementId, btnElement) {
-            const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = btnElement.innerHTML;
-                btnElement.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied!</span>';
-                setTimeout(() => {
-                    btnElement.innerHTML = originalText;
-                }, 2000);
-            }).catch(err => {
-                alert('Failed to copy text: ' + err);
-            });
-        }
-
-        function escapeHtml(unsafe) {
-            return String(unsafe)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        function exportTableToCSV(filename) {
-            let csv = [];
-            let rows = document.querySelectorAll("#content-daily table tr");
-            for (let i = 0; i < rows.length; i++) {
-                let row = [], cols = rows[i].querySelectorAll("td, th");
-                for (let j = 0; j < cols.length; j++) 
-                    row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
-                csv.push(row.join(","));        
-            }
-            downloadCSV(csv.join("\n"), filename);
-        }
-
-        function downloadCSV(csv, filename) {
-            let csvFile = new Blob([csv], {type: "text/csv"});
-            let downloadLink = document.createElement("a");
-            downloadLink.download = filename;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        }
-    </script>
-</body>
-</html>
+                const hasWorks = s.otherWorksSet.size > 0;
+                const combinedOtherWorks = hasWorks ? [...s.otherWorksSet].join('\n• ') : '-';
