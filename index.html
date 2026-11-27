@@ -18,12 +18,23 @@
         #chatMessages::-webkit-scrollbar { width: 5px; }
         #chatMessages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
-        /* Sticky first column and header for wide scorecards */
+        /* Sticky first column, header, and grand total footer for wide scorecards */
         .table-scroll-wrap { max-height: 540px; overflow: auto; }
         .sticky-col { position: sticky; left: 0; z-index: 10; background-color: #ffffff; box-shadow: 2px 0 5px -2px rgba(15, 23, 42, 0.08); }
         thead th { position: sticky; top: 0; z-index: 20; background-color: #f8fafc; }
         thead th.sticky-col { z-index: 30; background-color: #f8fafc; }
+        tfoot td { position: sticky; bottom: 0; z-index: 20; background-color: #f1f5f9; border-top: 2px solid #cbd5e1; }
+        tfoot td.sticky-col { z-index: 30; background-color: #f1f5f9; }
         tbody tr:hover td.sticky-col { background-color: #f8fafc; }
+
+        /* Clean Print / PDF View */
+        @media print {
+            body { background-color: #ffffff; }
+            header, #hrChatbotContainer, .no-print { display: none !important; }
+            .table-scroll-wrap { max-height: none !important; overflow: visible !important; }
+            .sticky-col { position: static !important; box-shadow: none !important; }
+            .stat-card, .bg-white { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -62,7 +73,7 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
 
         <!-- Navigation Tabs -->
-        <div class="border-b border-slate-200">
+        <div class="border-b border-slate-200 no-print">
             <nav class="flex space-x-8 overflow-x-auto" aria-label="Tabs">
                 <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn border-blue-600 text-blue-600 whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-xs flex items-center space-x-2 transition">
                     <i class="fa-solid fa-calendar-day"></i>
@@ -87,7 +98,7 @@
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
             <!-- Top Row: Quick View Pills & Status/Reset -->
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center gap-2 flex-wrap no-print">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Quick View:</span>
                     <button onclick="setDatePreset('today', this)" class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition">Today</button>
                     <button onclick="setDatePreset('yesterday', this)" class="preset-btn text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition">Yesterday</button>
@@ -97,14 +108,14 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <div id="activeFiltersBadge" class="text-xs text-slate-500 font-medium italic">Loading live data...</div>
-                    <button onclick="clearFilters()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition">
+                    <button onclick="clearFilters()" class="no-print text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition">
                         Reset
                     </button>
                 </div>
             </div>
 
             <!-- Bottom Row: Custom Date Range + HR Agent + Quick Search -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end no-print">
                 <div class="md:col-span-4">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Custom Date Range</label>
                     <div class="flex items-center space-x-2">
@@ -144,11 +155,12 @@
                             <span class="text-xs font-bold text-slate-800">Reporting Coverage:</span>
                             <span id="coverageLoggedText" class="text-xs font-bold text-emerald-600">0 / 21 Agents Logged</span>
                             <span id="coveragePendingBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200">21 Pending</span>
+                            <span id="duplicateAlertBadge" class="hidden text-[11px] font-semibold px-2 py-0.5 rounded-md bg-orange-50 text-orange-700 border border-orange-200">0 Duplicate Logs</span>
                         </div>
                         <p class="text-[11px] text-slate-400 mt-0.5">Agents without a log entry in the currently selected date range</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 no-print">
                     <button onclick="copyPendingAgentsList(this)" id="copyPendingBtn" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-800 transition flex items-center gap-1.5">
                         <i class="fa-regular fa-copy"></i>
                         <span>Copy Pending List</span>
@@ -348,23 +360,33 @@
 
         <!-- TAB CONTENT: DAILY -->
         <div id="content-daily" class="tab-content active space-y-6">
-            <!-- Performance Analysis Section -->
+            <!-- Performance Analysis & Top 5 Performers Leaderboard Section -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <div class="border-b border-slate-100 pb-3 mb-4">
+                <div class="border-b border-slate-100 pb-3 mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center">
                         <i class="fa-solid fa-chart-column mr-2 text-blue-600"></i>
-                        <span>Performance Analysis</span>
+                        <span>Performance Analysis &amp; Top Performers</span>
                     </h3>
+                    <div class="flex items-center gap-2 no-print">
+                        <label for="leaderboardMetric" class="text-[11px] font-semibold text-slate-400 uppercase">Rank Top 5 By:</label>
+                        <select id="leaderboardMetric" onchange="renderDailyView()" class="border border-slate-300 rounded-lg text-xs px-2.5 py-1 bg-white focus:ring-blue-500 focus:border-blue-500 font-medium text-slate-700">
+                            <option value="olReleased">Offer Letters Released</option>
+                            <option value="connectedCalls">Connected Calls</option>
+                            <option value="docsReceived">Documents Received</option>
+                            <option value="selectionsAllClients">Selections (All Clients)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="h-64"><canvas id="lettersChart"></canvas></div>
                     <div class="h-64"><canvas id="callStatusChart"></canvas></div>
+                    <div class="h-64"><canvas id="topPerformersChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- Team Scorecard Table with Sticky First Column -->
+            <!-- Team Scorecard Table with Sticky First Column & Grand Total Footer -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+                <div class="p-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2 bg-slate-50/50">
                     <div>
                         <h3 class="text-sm font-bold text-slate-800 flex items-center">
                             <i class="fa-solid fa-users mr-2 text-blue-600"></i>
@@ -372,12 +394,17 @@
                         </h3>
                         <p class="text-[11px] text-slate-400 mt-0.5">Scroll horizontally to view all metrics &bull; Click any <strong>Other Works</strong> note to read in full</p>
                     </div>
-                    <button onclick="exportTableToCSV('daily_scorecard.csv')" class="text-xs text-slate-600 hover:text-blue-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition font-medium shadow-sm">
-                        <i class="fa-solid fa-download mr-1"></i> Export CSV
-                    </button>
+                    <div class="flex items-center gap-2 no-print">
+                        <button onclick="window.print()" class="text-xs text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition font-medium shadow-sm">
+                            <i class="fa-solid fa-print mr-1"></i> Print / PDF
+                        </button>
+                        <button onclick="exportTableToCSV('daily_scorecard.csv')" class="text-xs text-slate-600 hover:text-blue-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition font-medium shadow-sm">
+                            <i class="fa-solid fa-download mr-1"></i> Export CSV
+                        </button>
+                    </div>
                 </div>
                 <div class="table-scroll-wrap">
-                    <table class="min-w-full divide-y divide-slate-200 text-xs">
+                    <table id="dailyScorecardTable" class="min-w-full divide-y divide-slate-200 text-xs">
                         <thead class="text-slate-500 font-bold uppercase text-[10px]">
                             <tr>
                                 <th class="px-3 py-3 text-left sticky-col">HR Agent</th>
@@ -403,6 +430,7 @@
                             </tr>
                         </thead>
                         <tbody id="table-daily-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                        <tfoot id="table-daily-foot" class="text-slate-800 font-bold text-xs"></tfoot>
                     </table>
                 </div>
             </div>
@@ -450,6 +478,7 @@
                             </tr>
                         </thead>
                         <tbody id="table-weekly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                        <tfoot id="table-weekly-foot" class="text-slate-800 font-bold text-xs"></tfoot>
                     </table>
                 </div>
             </div>
@@ -497,6 +526,7 @@
                             </tr>
                         </thead>
                         <tbody id="table-monthly-body" class="bg-white divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                        <tfoot id="table-monthly-foot" class="text-slate-800 font-bold text-xs"></tfoot>
                     </table>
                 </div>
             </div>
@@ -669,7 +699,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
         </button>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH UX UPGRADES & LIVE GOOGLE SHEET CSV SYNC -->
+    <!-- JAVASCRIPT LOGIC WITH LEADERBOARD, GRAND TOTALS, DUPLICATE DETECTION & LIVE SYNC -->
     <script>
         // Pre-configured HR Team Roster (All 21 Unique Agents)
         const DEFAULT_HR_AGENTS = [
@@ -707,6 +737,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
         let currentMissingAgents = [];
         let lettersChartInstance = null;
         let callChartInstance = null;
+        let topPerformersChartInstance = null;
         let weeklyChartInstance = null;
         let monthlyOutputChart = null;
         let missingListExpanded = false;
@@ -731,7 +762,6 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             return '';
         }
 
-        // Handles DD/MM/YYYY (e.g. 18/11/2026) and YYYY-MM-DD timestamps
         function formatDate(timestampStr) {
             if (!timestampStr) return 'Unknown';
             const rawDate = String(timestampStr).trim().split(' ')[0];
@@ -1097,6 +1127,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             setTimeout(() => {
                 if (lettersChartInstance) lettersChartInstance.resize();
                 if (callChartInstance) callChartInstance.resize();
+                if (topPerformersChartInstance) topPerformersChartInstance.resize();
                 if (weeklyChartInstance) weeklyChartInstance.resize();
                 if (monthlyOutputChart) monthlyOutputChart.resize();
             }, 50);
@@ -1193,21 +1224,64 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             document.getElementById('stat-other-works-count').innerText = otherWorksCount.toLocaleString();
         }
 
-        // Render Daily View
+        // Render Daily View (with Duplicate Flagging, Grand Total Footer, and Top 5 Leaderboard)
         function renderDailyView() {
             const tbody = document.getElementById('table-daily-body');
+            const tfoot = document.getElementById('table-daily-foot');
             tbody.innerHTML = '';
 
+            // Count occurrences of (agent + date) to detect potential duplicate submissions
+            const pairCounts = {};
+            filteredData.forEach(r => {
+                const key = `${r.agent.toLowerCase()}__${r.date}`;
+                pairCounts[key] = (pairCounts[key] || 0) + 1;
+            });
+
+            let duplicateRowsCount = 0;
+            const grand = {
+                olAssigned: 0, olReleased: 0, promo: 0, revisedOl: 0,
+                offAssign: 0, offIssue: 0, callsAssigned: 0, connected: 0,
+                notConnected: 0, docs: 0, wa: 0, mails: 0, nw: 0,
+                selAll: 0, olAll: 0, ovD: 0, ovSS: 0, worksCount: 0
+            };
+
             filteredData.forEach(row => {
+                const key = `${row.agent.toLowerCase()}__${row.date}`;
+                const isDup = pairCounts[key] > 1;
+                if (isDup) duplicateRowsCount++;
+
+                grand.olAssigned += row.olAssigned;
+                grand.olReleased += row.olReleased;
+                grand.promo += row.promoReleased;
+                grand.revisedOl += row.revisedOlReleased;
+                grand.offAssign += row.offboardAssigned;
+                grand.offIssue += row.offboardIssued;
+                grand.callsAssigned += row.callsAssigned;
+                grand.connected += row.connectedCalls;
+                grand.notConnected += row.notConnectedCalls;
+                grand.docs += row.docsReceived;
+                grand.wa += row.whatsappCleared;
+                grand.mails += row.mails;
+                grand.nw += row.notWorking;
+                grand.selAll += row.selectionsAllClients;
+                grand.olAll += row.olAllClients;
+                grand.ovD += row.overallSelectionsD;
+                grand.ovSS += row.overallSelectionsSS;
+                if (row.otherWorks) grand.worksCount++;
+
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
+                tr.className = isDup ? "bg-amber-50/40 hover:bg-amber-50 transition" : "hover:bg-slate-50 transition";
                 
+                const dupTag = isDup
+                    ? `<span class="ml-1.5 px-1.5 py-0.5 text-[9px] font-bold rounded bg-orange-100 text-orange-700 border border-orange-200" title="Multiple entries logged by this agent on ${escapeHtml(row.date)}">Duplicate?</span>`
+                    : '';
+
                 const otherWorkCell = row.otherWorks
                     ? `<button onclick="openNoteModal(${JSON.stringify(row.agent)}, ${JSON.stringify(row.date)}, ${JSON.stringify(row.otherWorks)})" class="text-left text-blue-600 hover:underline max-w-[180px] truncate block" title="Click to read full note">${escapeHtml(row.otherWorks)}</button>`
                     : `<span class="text-slate-400">-</span>`;
 
                 tr.innerHTML = `
-                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap sticky-col">${escapeHtml(row.agent)}</td>
+                    <td class="px-3 py-3 font-semibold text-slate-800 whitespace-nowrap sticky-col">${escapeHtml(row.agent)}${dupTag}</td>
                     <td class="px-3 py-3 text-center text-slate-500 whitespace-nowrap">${escapeHtml(row.date)}</td>
                     <td class="px-3 py-3 text-center text-slate-600">${row.olAssigned}</td>
                     <td class="px-3 py-3 text-center font-bold text-blue-600">${row.olReleased}</td>
@@ -1231,20 +1305,47 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 tbody.appendChild(tr);
             });
 
-            let sumOLAssigned = 0, sumOLReleased = 0, sumPromo = 0, sumRevised = 0, sumOffboardIssued = 0;
-            let totalConn = 0, totalNotConn = 0;
-            filteredData.forEach(r => {
-                sumOLAssigned += r.olAssigned;
-                sumOLReleased += r.olReleased;
-                sumPromo += r.promoReleased;
-                sumRevised += r.revisedOlReleased;
-                sumOffboardIssued += r.offboardIssued;
-                totalConn += r.connectedCalls;
-                totalNotConn += r.notConnectedCalls;
-            });
+            // Update Duplicate Alert Badge in Coverage Card
+            const dupBadge = document.getElementById('duplicateAlertBadge');
+            if (dupBadge) {
+                if (duplicateRowsCount > 0) {
+                    dupBadge.classList.remove('hidden');
+                    dupBadge.innerText = `${duplicateRowsCount} Duplicate Logs`;
+                } else {
+                    dupBadge.classList.add('hidden');
+                }
+            }
 
+            // Render Grand Total Footer Row
+            tfoot.innerHTML = `
+                <tr>
+                    <td class="px-3 py-3 text-left sticky-col uppercase text-[11px] text-slate-900">Grand Total (${filteredData.length})</td>
+                    <td class="px-3 py-3 text-center text-slate-500">-</td>
+                    <td class="px-3 py-3 text-center">${grand.olAssigned}</td>
+                    <td class="px-3 py-3 text-center text-blue-700">${grand.olReleased}</td>
+                    <td class="px-3 py-3 text-center text-indigo-700">${grand.promo}</td>
+                    <td class="px-3 py-3 text-center text-cyan-700">${grand.revisedOl}</td>
+                    <td class="px-3 py-3 text-center text-orange-700">${grand.offAssign}</td>
+                    <td class="px-3 py-3 text-center text-rose-700">${grand.offIssue}</td>
+                    <td class="px-3 py-3 text-center">${grand.callsAssigned}</td>
+                    <td class="px-3 py-3 text-center text-emerald-700">${grand.connected}</td>
+                    <td class="px-3 py-3 text-center text-rose-700">${grand.notConnected}</td>
+                    <td class="px-3 py-3 text-center text-amber-700">${grand.docs}</td>
+                    <td class="px-3 py-3 text-center text-purple-700">${grand.wa}</td>
+                    <td class="px-3 py-3 text-center">${grand.mails}</td>
+                    <td class="px-3 py-3 text-center text-slate-500">${grand.nw}</td>
+                    <td class="px-3 py-3 text-center text-teal-700">${grand.selAll}</td>
+                    <td class="px-3 py-3 text-center text-violet-700">${grand.olAll}</td>
+                    <td class="px-3 py-3 text-center text-fuchsia-700">${grand.ovD}</td>
+                    <td class="px-3 py-3 text-center text-fuchsia-800">${grand.ovSS}</td>
+                    <td class="px-3 py-3 text-left text-lime-700">${grand.worksCount} entries</td>
+                </tr>
+            `;
+
+            // Charts
             if (lettersChartInstance) lettersChartInstance.destroy();
             if (callChartInstance) callChartInstance.destroy();
+            if (topPerformersChartInstance) topPerformersChartInstance.destroy();
 
             const lettersCtx = document.getElementById('lettersChart').getContext('2d');
             lettersChartInstance = new Chart(lettersCtx, {
@@ -1253,12 +1354,12 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                     labels: ['OL Assigned', 'OL Released', 'Promo Released', 'Revised OL', 'Off-boarding Issued'],
                     datasets: [{
                         label: 'Letter Volume',
-                        data: [sumOLAssigned, sumOLReleased, sumPromo, sumRevised, sumOffboardIssued],
+                        data: [grand.olAssigned, grand.olReleased, grand.promo, grand.revisedOl, grand.offIssue],
                         backgroundColor: ['#2563eb', '#0ea5e9', '#4f46e5', '#0891b2', '#f43f5e'],
                         borderRadius: 4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, title: { display: true, text: 'Letters & Off-boarding Volume', font: { size: 11 } } } }
             });
 
             const callCtx = document.getElementById('callStatusChart').getContext('2d');
@@ -1266,13 +1367,53 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 type: 'doughnut',
                 data: {
                     labels: ['Connected Calls', 'Not Connected Calls'],
-                    datasets: [{ data: [totalConn, totalNotConn], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }]
+                    datasets: [{ data: [grand.connected, grand.notConnected], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }, title: { display: true, text: 'Call Connection Ratio', font: { size: 11 } } } }
+            });
+
+            // Top 5 Performers Horizontal Leaderboard
+            const metricKey = document.getElementById('leaderboardMetric').value || 'olReleased';
+            const metricLabels = {
+                olReleased: 'Offer Letters Released',
+                connectedCalls: 'Connected Calls',
+                docsReceived: 'Documents Received',
+                selectionsAllClients: 'Selections (All Clients)'
+            };
+            const agentTotals = {};
+            filteredData.forEach(r => {
+                agentTotals[r.agent] = (agentTotals[r.agent] || 0) + (r[metricKey] || 0);
+            });
+            const top5 = Object.entries(agentTotals)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const topCtx = document.getElementById('topPerformersChart').getContext('2d');
+            topPerformersChartInstance = new Chart(topCtx, {
+                type: 'bar',
+                data: {
+                    labels: top5.map(item => item[0]),
+                    datasets: [{
+                        label: metricLabels[metricKey],
+                        data: top5.map(item => item[1]),
+                        backgroundColor: ['#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: `Top 5 Agents — ${metricLabels[metricKey]}`, font: { size: 11 } }
+                    },
+                    scales: { x: { beginAtZero: true } }
+                }
             });
         }
 
-        // Render Weekly View
+        // Render Weekly View (with Grand Total Footer)
         function renderWeeklyView() {
             const dailyMap = {};
             filteredData.forEach(row => {
@@ -1298,10 +1439,15 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
 
             const sortedDates = Object.keys(dailyMap).sort();
             const tableBody = document.getElementById('table-weekly-body');
+            const tableFoot = document.getElementById('table-weekly-foot');
             tableBody.innerHTML = '';
+
+            const wGrand = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, totalCalls: 0, calls: 0, docs: 0, wa: 0, mails: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0 };
 
             sortedDates.forEach(date => {
                 const d = dailyMap[date];
+                Object.keys(wGrand).forEach(k => wGrand[k] += d[k]);
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
@@ -1325,6 +1471,27 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 tableBody.appendChild(tr);
             });
 
+            tableFoot.innerHTML = `
+                <tr>
+                    <td class="px-3 py-3 text-left sticky-col uppercase text-[11px] text-slate-900">Grand Total (${sortedDates.length} days)</td>
+                    <td class="px-3 py-3 text-center">${wGrand.olAssigned}</td>
+                    <td class="px-3 py-3 text-center text-blue-700">${wGrand.ol}</td>
+                    <td class="px-3 py-3 text-center text-indigo-700">${wGrand.promo}</td>
+                    <td class="px-3 py-3 text-center text-cyan-700">${wGrand.revisedOl}</td>
+                    <td class="px-3 py-3 text-center text-orange-700">${wGrand.offAssign}</td>
+                    <td class="px-3 py-3 text-center text-rose-700">${wGrand.offIssue}</td>
+                    <td class="px-3 py-3 text-center">${wGrand.totalCalls}</td>
+                    <td class="px-3 py-3 text-center text-emerald-700">${wGrand.calls}</td>
+                    <td class="px-3 py-3 text-center text-amber-700">${wGrand.docs}</td>
+                    <td class="px-3 py-3 text-center text-purple-700">${wGrand.wa}</td>
+                    <td class="px-3 py-3 text-center">${wGrand.mails}</td>
+                    <td class="px-3 py-3 text-center text-teal-700">${wGrand.selAll}</td>
+                    <td class="px-3 py-3 text-center text-violet-700">${wGrand.olAll}</td>
+                    <td class="px-3 py-3 text-center text-fuchsia-700">${wGrand.ovD}</td>
+                    <td class="px-3 py-3 text-center text-fuchsia-800">${wGrand.ovSS}</td>
+                </tr>
+            `;
+
             if (weeklyChartInstance) weeklyChartInstance.destroy();
             const weeklyCtx = document.getElementById('weeklyTrendsChart').getContext('2d');
             weeklyChartInstance = new Chart(weeklyCtx, {
@@ -1341,7 +1508,7 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             });
         }
 
-        // Render Monthly View (Includes all 21 pre-configured HR Agents + Other Works)
+        // Render Monthly View (Includes all 21 pre-configured HR Agents + Grand Total Footer)
         function renderMonthlyView() {
             const selectedAgent = document.getElementById('agentFilter').value;
             const agentSummary = {};
@@ -1377,11 +1544,16 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
             });
 
             const tbody = document.getElementById('table-monthly-body');
+            const tfoot = document.getElementById('table-monthly-foot');
             tbody.innerHTML = '';
+
+            const mGrand = { olAssigned: 0, ol: 0, promo: 0, revisedOl: 0, offAssign: 0, offIssue: 0, calls: 0, docs: 0, wa: 0, mails: 0, nw: 0, selAll: 0, olAll: 0, ovD: 0, ovSS: 0 };
 
             const sortedAgents = Object.keys(agentSummary).sort((a, b) => a.localeCompare(b));
             sortedAgents.forEach(agent => {
                 const s = agentSummary[agent];
+                Object.keys(mGrand).forEach(k => mGrand[k] += s[k]);
+
                 const combinedOtherWorks = s.otherWorksSet.size > 0 ? [...s.otherWorksSet].join(' | ') : '';
                 const otherWorkCell = combinedOtherWorks
                     ? `<button onclick="openNoteModal(${JSON.stringify(agent)}, 'Cumulative Summary', ${JSON.stringify(combinedOtherWorks)})" class="text-left text-blue-600 hover:underline max-w-[180px] truncate block" title="Click to read full note">${escapeHtml(combinedOtherWorks)}</button>`
@@ -1410,6 +1582,28 @@ Reporting Period: <span class="template-var" data-var="weekRange">[Week Date Ran
                 `;
                 tbody.appendChild(tr);
             });
+
+            tfoot.innerHTML = `
+                <tr>
+                    <td class="px-3 py-3 text-left sticky-col uppercase text-[11px] text-slate-900">Grand Total (${sortedAgents.length})</td>
+                    <td class="px-3 py-3 text-center">${mGrand.olAssigned}</td>
+                    <td class="px-3 py-3 text-center text-blue-700">${mGrand.ol}</td>
+                    <td class="px-3 py-3 text-center text-indigo-700">${mGrand.promo}</td>
+                    <td class="px-3 py-3 text-center text-cyan-700">${mGrand.revisedOl}</td>
+                    <td class="px-3 py-3 text-center text-orange-700">${mGrand.offAssign}</td>
+                    <td class="px-3 py-3 text-center text-rose-700">${mGrand.offIssue}</td>
+                    <td class="px-3 py-3 text-center text-emerald-700">${mGrand.calls}</td>
+                    <td class="px-3 py-3 text-center text-amber-700">${mGrand.docs}</td>
+                    <td class="px-3 py-3 text-center text-purple-700">${mGrand.wa}</td>
+                    <td class="px-3 py-3 text-center">${mGrand.mails}</td>
+                    <td class="px-3 py-3 text-center text-slate-500">${mGrand.nw}</td>
+                    <td class="px-3 py-3 text-center text-teal-700">${mGrand.selAll}</td>
+                    <td class="px-3 py-3 text-center text-violet-700">${mGrand.olAll}</td>
+                    <td class="px-3 py-3 text-center text-fuchsia-700">${mGrand.ovD}</td>
+                    <td class="px-3 py-3 text-center text-fuchsia-800">${mGrand.ovSS}</td>
+                    <td class="px-3 py-3 text-left text-slate-500">-</td>
+                </tr>
+            `;
 
             if (monthlyOutputChart) monthlyOutputChart.destroy();
             const monthlyCtx = document.getElementById('monthlyOutputChart').getContext('2d');
